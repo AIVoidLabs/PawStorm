@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 namespace PawStorm;
 
@@ -28,6 +28,7 @@ public partial class PlayerStats : Resource
 	[ExportGroup("Slope")]
 	[Export] public float SlopeForce { get; set; } = 30f;
 	[Export] public float MaxFloorAngleDeg { get; set; } = 60f;
+	[Export] public float StepHeight { get; set; } = 0.5f;
 
 	[ExportGroup("Wind")]
 	[Export] public float WindForceMultiplier { get; set; } = 1f;

@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="PlayerStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Core/PlayerStats.cs" id="1"]
+
+[resource]
+script = ExtResource("1")
+MaxSpeed = 40
+Acceleration = 18
+Deceleration = 30
+Friction = 10
+TurnDrag = 40
+TurnRate = 8
+JumpVelocity = 13
+JumpCutMultiplier = 0.4
+Gravity = 36
+MaxFallSpeed = 60
+CoyoteTime = 0.1
+AirAcceleration = 12
+AirControl = 0.6
+AirDrag = 0.5
+SlopeForce = 30
+MaxFloorAngleDeg = 60
+StepHeight = 0.5
+WindForceMultiplier = 1
+FovMin = 70
+FovMax = 100
+CameraDistance = 6
+CameraFollowSpeed = 8
+MouseSensitivity = 0.003
+StickSensitivity = 2.5
+

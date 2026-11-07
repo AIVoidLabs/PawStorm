@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud.cs" id="1"]
+
+[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("FishLabel", "SpeedLabel")]
+script = ExtResource("1")
+FishLabel = NodePath("Box/FishLabel")
+SpeedLabel = NodePath("Box/SpeedLabel")
+
+[node name="Box" type="VBoxContainer" parent="."]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 300.0
+offset_bottom = 100.0
+
+[node name="FishLabel" type="Label" parent="Box"]
+theme_override_font_sizes/font_size = 28
+text = "Fish: 0"
+
+[node name="SpeedLabel" type="Label" parent="Box"]
+theme_override_font_sizes/font_size = 28
+text = "Speed: 0"
