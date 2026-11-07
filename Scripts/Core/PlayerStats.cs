@@ -52,6 +52,21 @@ public partial class PlayerStats : Resource
 	[Export] public float GrindSnapDistance { get; set; } = 1.0f;
 	[Export] public float GrindCooldown { get; set; } = 0.3f;
 
+	[ExportGroup("Wall / Air Twist / Loop")]
+	[Export] public float AirTwistVelocity { get; set; } = 11f;
+	[Export] public float WallClimbSpeed { get; set; } = 6f;
+	[Export] public float WallClimbTime { get; set; } = 2.5f;
+	[Export] public float WallSlideSpeed { get; set; } = 3f;
+	[Export] public float WallJumpPush { get; set; } = 9f;
+	[Export] public float LoopMinSpeed { get; set; } = 20f;
+
+	[ExportGroup("Damage")]
+	[Export] public float HurtKnockback { get; set; } = 9f;
+	[Export] public float HurtUpSpeed { get; set; } = 8f;
+	[Export] public float HurtMinTime { get; set; } = 0.4f;
+	[Export] public float InvulnTime { get; set; } = 2f;
+	[Export] public float EnemyBounce { get; set; } = 10f;
+
 	[ExportGroup("Wind")]
 	[Export] public float WindForceMultiplier { get; set; } = 1f;
 

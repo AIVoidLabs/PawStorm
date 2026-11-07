@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace PawStorm;
 
-public enum PlayerStateId { Idle, Run, Jump, Fall, Charge, Spin, Pounce, Grind }
+public enum PlayerStateId { Idle, Run, Jump, Fall, Charge, Spin, Pounce, Grind, WallClimb, Loop, Hurt }
 
 public partial class StateMachine
 {

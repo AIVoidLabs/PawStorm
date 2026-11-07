@@ -34,6 +34,7 @@ public partial class ChargeState : PlayerState
 			float t = Mathf.Clamp(_charge / Stats.SpinChargeTime, 0f, 1f);
 			float speed = Mathf.Lerp(Stats.SpinDashMinSpeed, Stats.SpinDashMaxSpeed, t);
 			p.Velocity = _aim.Slide(n).Normalized() * speed;
+			Sfx.Play(p, "spin");
 			Machine.Transition(PlayerStateId.Spin);
 		}
 	}

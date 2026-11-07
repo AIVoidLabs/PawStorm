@@ -28,7 +28,7 @@ public partial class PlayerController : CharacterBody3D
 	{
 		AddToGroup("player");
 		Stats ??= new PlayerStats();
-		_spawn = GlobalPosition;
+		_spawn = _firstSpawn = GlobalPosition;
 		FloorMaxAngle = Mathf.DegToRad(Stats.MaxFloorAngleDeg);
 		FloorStopOnSlope = false;
 		FloorSnapLength = 0.6f;
@@ -41,6 +41,9 @@ public partial class PlayerController : CharacterBody3D
 		Machine.Register(PlayerStateId.Spin, new SpinState(this));
 		Machine.Register(PlayerStateId.Pounce, new PounceState(this));
 		Machine.Register(PlayerStateId.Grind, new GrindState(this));
+		Machine.Register(PlayerStateId.WallClimb, new WallClimbState(this));
+		Machine.Register(PlayerStateId.Loop, new LoopState(this));
+		Machine.Register(PlayerStateId.Hurt, new HurtState(this));
 		Machine.Transition(PlayerStateId.Fall);
 	}
 
@@ -48,11 +51,68 @@ public partial class PlayerController : CharacterBody3D
 	{
 		float dt = (float)delta;
 		_grindCooldown -= dt;
+		UpdateInvulnerability(dt);
 		_jumpBuffer = Input.IsActionJustPressed("jump") ? JumpBufferTime : Mathf.Max(0f, _jumpBuffer - dt);
 		InputDir = ReadCameraRelativeInput();
 		Machine.Physics(dt);
 		UpdateVisual(dt);
-		if (GlobalPosition.Y < KillHeight) Respawn();
+		if (GlobalPosition.Y < KillHeight) Die();
+	}
+
+	// ---- Damage / lives ----
+	public Vector3 HurtDirection { get; private set; }
+	public bool IsInvulnerable => _invuln > 0f;
+	private float _invuln;
+	private Vector3 _firstSpawn;
+	private PackedScene _fishScene;
+
+	/// <summary>True while the player's body damages enemies (rolling, jumping or pouncing).</summary>
+	public bool IsAttacking => Machine.CurrentId is PlayerStateId.Spin or PlayerStateId.Pounce or PlayerStateId.Jump;
+
+	public void SetCheckpoint(Vector3 position) => _spawn = position;
+
+	private void UpdateInvulnerability(float dt)
+	{
+		if (_invuln <= 0f) return;
+		_invuln -= dt;
+		if (Visual != null) Visual.Visible = _invuln <= 0f || ((int)(_invuln * 12f)) % 2 == 0;
+	}
+
+	/// <summary>Hit by an enemy or hazard: drop fish; with no fish left lose a life.</summary>
+	public void TakeHit(Vector3 sourcePosition)
+	{
+		if (_invuln > 0f || Machine.CurrentId == PlayerStateId.Hurt || GameState.LevelDone) return;
+		_invuln = Stats.InvulnTime;
+		int lost = GameState.TakeFishHit();
+		Sfx.Play(this, "hurt");
+		if (lost == 0) { Die(); return; }
+		ScatterFish(lost);
+		Vector3 away = GlobalPosition - sourcePosition; away.Y = 0;
+		HurtDirection = away.LengthSquared() > 0.01f ? away.Normalized() : -Facing;
+		Machine.Transition(PlayerStateId.Hurt);
+	}
+
+	/// <summary>Lose a life and return to the last checkpoint (or the level start on game over).</summary>
+	public void Die()
+	{
+		bool gameOver = GameState.LoseLife();
+		if (gameOver) { _spawn = _firstSpawn; GameState.BeginLevel(); }
+		_invuln = Stats.InvulnTime;
+		Respawn();
+	}
+
+	private void ScatterFish(int count)
+	{
+		_fishScene ??= GD.Load<PackedScene>("res://Scenes/Props/Fish.tscn");
+		int n = Mathf.Min(count, 12);
+		for (int i = 0; i < n; i++)
+		{
+			float a = Mathf.Tau * i / n;
+			var fish = _fishScene.Instantiate<FishPickup>();
+			fish.Delay = 1.2f;
+			fish.Position = GlobalPosition + new Vector3(Mathf.Cos(a), 0.6f + (i % 3) * 0.5f, Mathf.Sin(a)) * (1.5f + (i % 2));
+			GetParent().CallDeferred(Node.MethodName.AddChild, fish);
+		}
 	}
 
 	/// <summary>Current state name (debug / tests).</summary>
@@ -77,6 +137,53 @@ public partial class PlayerController : CharacterBody3D
 		Vector3 r = Visual.Rotation;
 		r.Y = Mathf.LerpAngle(r.Y, Mathf.Atan2(-dir.X, -dir.Z), Mathf.Clamp(20f * dt, 0f, 1f));
 		Visual.Rotation = r;
+	}
+
+	public Vector3 WallNormal { get; private set; }
+	public LoopTrack CurrentLoop { get; private set; }
+	public bool AirTwistUsed { get; private set; }
+
+	public void ResetAirActions() => AirTwistUsed = false;
+
+	/// <summary>Second jump in mid-air (only once until landing).</summary>
+	public bool TryAirTwist()
+	{
+		if (AirTwistUsed) return false;
+		AirTwistUsed = true;
+		ConsumeJump();
+		var v = Velocity;
+		v.Y = Stats.AirTwistVelocity;
+		Velocity = v;
+		return true;
+	}
+
+	/// <summary>Cling to a wall in the "climbable" group when pushing into it in mid-air.</summary>
+	public bool TryWallClimb()
+	{
+		if (!IsOnWall() || IsOnFloor() || InputDir.LengthSquared() < 0.01f) return false;
+		for (int i = 0; i < GetSlideCollisionCount(); i++)
+		{
+			var c = GetSlideCollision(i);
+			Vector3 n = c.GetNormal();
+			if (Mathf.Abs(n.Y) > 0.3f) continue;
+			if (c.GetCollider() is not Node node || !node.IsInGroup("climbable")) continue;
+			if (InputDir.Normalized().Dot(-n) < 0.3f) continue;
+			WallNormal = n;
+			Machine.Transition(PlayerStateId.WallClimb);
+			return true;
+		}
+		return false;
+	}
+
+	/// <summary>Enter a loop when running into its trigger fast enough in its direction.</summary>
+	public void TryStartLoop(LoopTrack loop)
+	{
+		var id = Machine.CurrentId;
+		if (id != PlayerStateId.Run && id != PlayerStateId.Spin) return;
+		Vector3 h = new Vector3(Velocity.X, 0, Velocity.Z);
+		if (h.Length() < Stats.LoopMinSpeed || h.Normalized().Dot(loop.Forward) < 0.8f) return;
+		CurrentLoop = loop;
+		Machine.Transition(PlayerStateId.Loop);
 	}
 
 	public void StartGrindCooldown() => _grindCooldown = Stats.GrindCooldown;
@@ -115,6 +222,7 @@ public partial class PlayerController : CharacterBody3D
 			if (n is not GrindRail rail || rail.Curve == null) continue;
 			float off = rail.ClosestOffset(center);
 			if (rail.WorldPointAt(off).DistanceTo(center) > Stats.GrindSnapDistance) continue;
+			ResetAirActions();
 			CurrentRail = rail;
 			RailOffset = off;
 			Machine.Transition(PlayerStateId.Grind);
@@ -150,7 +258,9 @@ public partial class PlayerController : CharacterBody3D
 	public bool JumpPressed() => _jumpBuffer > 0f;
 	public void ConsumeJump() => _jumpBuffer = 0f;
 
-	public void Land() => Machine.Transition(InputDir.LengthSquared() > 0.01f || HorizontalSpeed > 0.5f
+	public void Land() { ResetAirActions(); LandTransition(); }
+
+	private void LandTransition() => Machine.Transition(InputDir.LengthSquared() > 0.01f || HorizontalSpeed > 0.5f
 		? PlayerStateId.Run : PlayerStateId.Idle);
 
 	private Vector3 ReadCameraRelativeInput()

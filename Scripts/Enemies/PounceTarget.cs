@@ -3,7 +3,13 @@ using Godot;
 namespace PawStorm;
 
 /// <summary>Placeholder homing-attack target (future enemies derive from the same idea).</summary>
-public partial class PounceTarget : Node3D
+/// <summary>Anything the Pounce can lock onto and hit.</summary>
+public interface IPounceable
+{
+	void Hit();
+}
+
+public partial class PounceTarget : Node3D, IPounceable
 {
 	[Export] public int FishReward { get; set; } = 3;
 

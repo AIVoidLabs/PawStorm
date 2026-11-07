@@ -8,6 +8,14 @@
 [ext_resource type="Script" path="res://Scripts/Core/FloatingProp.cs" id="6"]
 [ext_resource type="Script" path="res://Scripts/Core/GrindRail.cs" id="7"]
 [ext_resource type="Script" path="res://Scripts/Enemies/PounceTarget.cs" id="8"]
+[ext_resource type="Script" path="res://Scripts/Core/LoopTrack.cs" id="9"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Enemy.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Checkpoint.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
+[sub_resource type="BoxShape3D" id="loop_trigger"]
+size = Vector3(4, 3, 2)
+
 
 [sub_resource type="StandardMaterial3D" id="target_mat"]
 albedo_color = Color(1, 0.2, 0.2, 1)
@@ -144,15 +152,6 @@ material = SubResource("ramp")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -121)
 use_collision = true
 size = Vector3(10, 2, 20)
-material = SubResource("ramp")
-
-[node name="LoopPlaceholder" type="CSGTorus3D" parent="Geometry"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 11, 8, -20)
-use_collision = true
-inner_radius = 7.0
-outer_radius = 8.0
-sides = 24
-ring_sides = 8
 material = SubResource("ramp")
 
 [node name="WindZone" type="Area3D" parent="."]
@@ -363,3 +362,57 @@ script = ExtResource("8")
 
 [node name="Mesh" type="MeshInstance3D" parent="PounceTargets/Target3"]
 mesh = SubResource("target_mesh")
+[node name="Loop" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -8)
+script = ExtResource("9")
+Radius = 8.0
+LateralOffset = -4.0
+
+[node name="Trigger" type="CollisionShape3D" parent="Loop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("loop_trigger")
+
+[node name="ClimbWall" type="CSGBox3D" parent="Geometry" groups=["climbable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 5, -112)
+use_collision = true
+size = Vector3(1, 10, 8)
+material = SubResource("prop")
+
+[node name="WallFish1" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 4, -112)
+
+[node name="WallFish2" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 7, -112)
+
+[node name="WallFish3" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 11, -112)
+[node name="LevelController" type="Node" parent="."]
+script = ExtResource("13")
+LevelTitle = "Çatılar Şehri"
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy1" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -18)
+PatrolOffset = Vector3(6, 0, 0)
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -125)
+PatrolOffset = Vector3(3, 0, 0)
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -180)
+PatrolOffset = Vector3(6, 0, 0)
+
+[node name="Enemy4" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -205)
+PatrolOffset = Vector3(0, 0, 4)
+
+[node name="Checkpoint1" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -95)
+
+[node name="Checkpoint2" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -160)
+
+[node name="StormCore" parent="." instance=ExtResource("12")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -218)

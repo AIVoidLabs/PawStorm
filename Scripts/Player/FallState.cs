@@ -13,10 +13,10 @@ public partial class FallState : PlayerState
 		var p = Player;
 		_coyote -= dt;
 		if (_coyote > 0f && p.JumpPressed()) { Machine.Transition(PlayerStateId.Jump); return; }
-		if (p.JumpPressed() && p.TryPounce()) return;
+		if (p.JumpPressed() && (p.TryPounce() || p.TryAirTwist())) return;
 		p.ApplyAirMovement(dt);
 		p.MoveAndSlide();
-		if (p.TryStartGrind()) return;
+		if (p.TryStartGrind() || p.TryWallClimb()) return;
 		if (p.IsOnFloor()) p.Land();
 	}
 }

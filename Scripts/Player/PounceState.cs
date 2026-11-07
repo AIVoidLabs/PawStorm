@@ -14,6 +14,7 @@ public partial class PounceState : PlayerState
 	{
 		_target = Player.PounceTargetNode;
 		_t = 0f;
+		Sfx.Play(Player, "pounce");
 	}
 
 	public override void Physics(float dt)
@@ -25,7 +26,8 @@ public partial class PounceState : PlayerState
 		_t += dt;
 		if (to.Length() < 1.0f)
 		{
-			if (_target is PounceTarget pt) pt.Hit();
+			if (_target is IPounceable pt) pt.Hit();
+			p.ResetAirActions();
 			Vector3 h = new Vector3(to.X, 0, to.Z);
 			p.Velocity = (h.LengthSquared() > 0.01f ? h.Normalized() : Vector3.Zero) * Stats.PounceSpeed * 0.3f
 				+ Vector3.Up * Stats.PounceBounce;

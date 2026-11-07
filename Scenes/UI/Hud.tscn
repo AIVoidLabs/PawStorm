@@ -2,21 +2,54 @@
 
 [ext_resource type="Script" path="res://Scripts/UI/Hud.cs" id="1"]
 
-[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("FishLabel", "SpeedLabel")]
+[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("FishLabel", "LivesLabel", "SpeedLabel", "TimeLabel", "MessageLabel")]
 script = ExtResource("1")
 FishLabel = NodePath("Box/FishLabel")
+LivesLabel = NodePath("Box/LivesLabel")
 SpeedLabel = NodePath("Box/SpeedLabel")
+TimeLabel = NodePath("TimeLabel")
+MessageLabel = NodePath("Message")
 
 [node name="Box" type="VBoxContainer" parent="."]
 offset_left = 24.0
 offset_top = 16.0
 offset_right = 300.0
-offset_bottom = 100.0
+offset_bottom = 150.0
 
 [node name="FishLabel" type="Label" parent="Box"]
 theme_override_font_sizes/font_size = 28
 text = "Fish: 0"
 
+[node name="LivesLabel" type="Label" parent="Box"]
+theme_override_font_sizes/font_size = 28
+text = "9 Lives: 9"
+
 [node name="SpeedLabel" type="Label" parent="Box"]
 theme_override_font_sizes/font_size = 28
 text = "Speed: 0"
+
+[node name="TimeLabel" type="Label" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 16.0
+offset_right = -24.0
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 28
+text = "00:00"
+
+[node name="Message" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -100.0
+offset_right = 300.0
+offset_bottom = 100.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 36
+text = ""
