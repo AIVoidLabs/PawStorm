@@ -29,11 +29,6 @@ public partial class FollowCamera : Node3D
 			_yaw -= m.Relative.X * Stats.MouseSensitivity;
 			_pitch -= m.Relative.Y * Stats.MouseSensitivity;
 		}
-		else if (e is InputEventKey k && k.Pressed && k.Keycode == Key.Escape)
-		{
-			Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
-				? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
-		}
 	}
 
 	public override void _PhysicsProcess(double delta)

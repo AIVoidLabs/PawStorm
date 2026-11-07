@@ -28,7 +28,7 @@ public partial class GrindRail : Path3D
 
 	private void BuildVisual()
 	{
-		var mat = new StandardMaterial3D { AlbedoColor = new Color(0.75f, 0.78f, 0.85f), Metallic = 0.6f };
+		var mat = new StandardMaterial3D { DiffuseMode = BaseMaterial3D.DiffuseModeEnum.Toon, SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled, AlbedoColor = new Color(0.75f, 0.78f, 0.85f), Metallic = 0.6f };
 		for (int i = 0; i < Points.Length - 1; i++)
 		{
 			Vector3 a = Points[i], b = Points[i + 1];

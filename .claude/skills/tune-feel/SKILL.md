@@ -49,3 +49,14 @@ Karakterin tüm fizik sabitleri `Resources/PlayerStats.tres` (C# Resource) için
 | PounceBounce / PounceMaxTime | Çarpma sonrası zıplama; zaman aşımı. |
 | GrindMinSpeed / GrindGravityFactor | Rayda minimum hız; eğimde hız kazancı. |
 | GrindSnapDistance / GrindCooldown | Ray yakalama mesafesi; raydan çıkınca tekrar yakalama bekleme süresi. |
+
+## Aşama 3 alanları
+| Alan | Etkisi |
+|---|---|
+| AirTwistVelocity | Havada ikinci zıplama gücü (iniş başına bir kez). |
+| WallClimbSpeed / WallClimbTime / WallSlideSpeed | Duvar tırmanma hızı, dayanma süresi, süre bitince kayma. |
+| WallJumpPush | Duvar zıplamasında duvardan itme. |
+| LoopMinSpeed | Loop'a girmek için gereken yatay hız. |
+| HurtKnockback / HurtUpSpeed / HurtMinTime | Hasar sonrası savrulma. |
+| InvulnTime | Hasar sonrası dokunulmazlık süresi (sn). |
+| EnemyBounce | Düşmana üstten vurunca zıplama. |

@@ -67,7 +67,8 @@ public partial class PlayerController : CharacterBody3D
 	private PackedScene _fishScene;
 
 	/// <summary>True while the player's body damages enemies (rolling, jumping or pouncing).</summary>
-	public bool IsAttacking => Machine.CurrentId is PlayerStateId.Spin or PlayerStateId.Pounce or PlayerStateId.Jump;
+	public bool IsAttacking => Machine.CurrentId is PlayerStateId.Spin or PlayerStateId.Pounce or PlayerStateId.Jump
+		|| (Machine.CurrentId == PlayerStateId.Fall && Velocity.Y < -1f);
 
 	public void SetCheckpoint(Vector3 position) => _spawn = position;
 
@@ -235,7 +236,7 @@ public partial class PlayerController : CharacterBody3D
 	public void ApplyRollMovement(float dt)
 	{
 		Vector3 n = IsOnFloor() ? GetFloorNormal() : Vector3.Up;
-		Vector3 vel = Velocity.Slide(n);
+		Vector3 vel = KeepGroundSpeed(Velocity.Slide(n));
 		vel += (Vector3.Down * Stats.Gravity).Slide(n) * (Stats.SlopeForce / Stats.Gravity) * Stats.RollSlopeMultiplier * dt;
 		float speed = vel.Length();
 		if (speed > 0.05f)
@@ -251,6 +252,7 @@ public partial class PlayerController : CharacterBody3D
 			vel = dir * speed;
 		}
 		vel += ExternalAccel.Slide(n) * Stats.WindForceMultiplier * dt;
+		_storedSpeed = vel.Length();
 		Velocity = vel - n * 0.5f;
 		TryStepUp(dt);
 	}
@@ -274,11 +276,36 @@ public partial class PlayerController : CharacterBody3D
 		return (right * raw.X + fwd * -raw.Y).LimitLength(1f);
 	}
 
+	private ulong _lastGroundFrame;
+	private float _storedSpeed;
+
+	private bool HitWallLastMove()
+	{
+		for (int i = 0; i < GetSlideCollisionCount(); i++)
+			if (Mathf.Abs(GetSlideCollision(i).GetNormal().Y) < 0.5f) return true;
+		return false;
+	}
+
+	/// <summary>
+	/// MoveAndSlide hands back only the horizontal part of a velocity that follows a tilted floor, so the speed
+	/// would shrink by cos(slope) every frame. While we stay grounded (and did not hit a wall), restore the
+	/// speed we set last frame.
+	/// </summary>
+	private Vector3 KeepGroundSpeed(Vector3 slid)
+	{
+		ulong frame = Engine.GetPhysicsFrames();
+		bool contiguous = _lastGroundFrame + 1 == frame;
+		_lastGroundFrame = frame;
+		float len = slid.Length();
+		if (contiguous && len > 0.01f && _storedSpeed > len && !HitWallLastMove())
+			slid = slid / len * _storedSpeed;
+		return slid;
+	}
 	/// <summary>Momentum-based ground movement along the floor plane, with slope gravity.</summary>
 	public void ApplyGroundMovement(float dt)
 	{
 		Vector3 n = IsOnFloor() ? GetFloorNormal() : Vector3.Up;
-		Vector3 vel = Velocity.Slide(n);
+		Vector3 vel = KeepGroundSpeed(Velocity.Slide(n));
 		float speed;
 
 		// Slope: gravity component along the surface speeds up downhill, slows uphill.
@@ -314,6 +341,7 @@ public partial class PlayerController : CharacterBody3D
 
 		vel += ExternalAccel.Slide(n) * Stats.WindForceMultiplier * dt;
 		// Small downward push so floor snap holds on crests.
+		_storedSpeed = vel.Length();
 		Velocity = vel - n * 0.5f;
 		TryStepUp(dt);
 	}
@@ -347,7 +375,7 @@ public partial class PlayerController : CharacterBody3D
 		}
 		horiz += ExternalAccel * Stats.WindForceMultiplier * dt;
 		v.X = horiz.X; v.Z = horiz.Z;
-		v.Y = Mathf.Max(v.Y - Stats.Gravity * dt, -Stats.MaxFallSpeed);
+		v.Y = Mathf.Max(v.Y - Stats.Gravity * dt + ExternalAccel.Y * Stats.WindForceMultiplier * dt, -Stats.MaxFallSpeed);
 		Velocity = v;
 	}
 

@@ -25,7 +25,7 @@ public partial class LevelController : Node
 		_doneTime += (float)delta;
 		if (_doneTime > ContinueDelay && (Input.IsActionJustPressed("jump") || Input.IsActionJustPressed("spin")))
 		{
-			string target = string.IsNullOrEmpty(NextScene) ? "res://Scenes/UI/MainMenu.tscn" : NextScene;
+			string target = string.IsNullOrEmpty(NextScene) ? Levels.Next((GetTree().CurrentScene?.SceneFilePath ?? "")) : NextScene;
 			GetTree().ChangeSceneToFile(target);
 		}
 	}

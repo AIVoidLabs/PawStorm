@@ -1,0 +1,449 @@
+[gd_scene load_steps=30 format=3]
+
+[ext_resource type="Material" path="res://Art/Materials/Outline.tres" id="outline"]
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Fish.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Hud.tscn" id="3"]
+[ext_resource type="Script" path="res://Scripts/Camera/FollowCamera.cs" id="4"]
+[ext_resource type="Script" path="res://Scripts/Core/WindZone.cs" id="5"]
+[ext_resource type="Script" path="res://Scripts/Core/FloatingProp.cs" id="6"]
+[ext_resource type="Script" path="res://Scripts/Core/GrindRail.cs" id="7"]
+[ext_resource type="Script" path="res://Scripts/Enemies/PounceTarget.cs" id="8"]
+[ext_resource type="Script" path="res://Scripts/Core/LoopTrack.cs" id="9"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Enemy.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Checkpoint.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
+[ext_resource type="Script" path="res://Scripts/Enemies/DrKennel.cs" id="14"]
+
+[sub_resource type="StandardMaterial3D" id="ground"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.45, 0.45, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="accent"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.95, 0.6, 0.15, 1)
+
+[sub_resource type="StandardMaterial3D" id="plat_mat"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.85, 0.85, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="target_mat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(1, 0.2, 0.2, 1)
+emission_enabled = true
+emission = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="target_mesh"]
+material = SubResource("target_mat")
+radius = 0.5
+height = 1.0
+
+[sub_resource type="BoxShape3D" id="plat_shape"]
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxMesh" id="plat_mesh"]
+material = SubResource("plat_mat")
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxShape3D" id="loop_trigger"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="SphereShape3D" id="boss_shape"]
+radius = 2.2
+
+[sub_resource type="StandardMaterial3D" id="boss_coat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.92, 0.92, 0.97, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_fur"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.55, 0.35, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_glass"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(1, 0.85, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="boss_body"]
+material = SubResource("boss_coat")
+radius = 1.1
+height = 2.6
+
+[sub_resource type="SphereMesh" id="boss_head"]
+material = SubResource("boss_fur")
+radius = 0.8
+height = 1.6
+
+[sub_resource type="SphereMesh" id="boss_goggle"]
+material = SubResource("boss_glass")
+radius = 0.3
+height = 0.6
+[sub_resource type="ProceduralSkyMaterial" id="skymat"]
+sky_top_color = Color(0.4, 0.4, 0.5, 1)
+sky_horizon_color = Color(0.75, 0.7, 0.65, 1)
+ground_horizon_color = Color(0.75, 0.7, 0.65, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("skymat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.8, 0.85, 1, 1)
+[sub_resource type="BoxShape3D" id="wind_1"]
+size = Vector3(28, 4, 30)
+
+[sub_resource type="BoxShape3D" id="wind_2"]
+size = Vector3(28, 4, 30)
+
+
+[node name="Factory" type="Node3D"]
+
+[node name="Env" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8, -0.35, 0.5, 0, 0.82, 0.57, -0.6, -0.46, 0.66, 0, 20, 0)
+shadow_enabled = true
+
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 5)
+
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("Target", "Arm", "Cam")]
+script = ExtResource("4")
+Target = NodePath("../Player")
+Arm = NodePath("Arm")
+Cam = NodePath("Arm/Camera3D")
+
+[node name="Arm" type="SpringArm3D" parent="CameraRig"]
+spring_length = 6.0
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Arm"]
+current = true
+
+[node name="Hud" parent="." instance=ExtResource("3")]
+
+[node name="LevelController" type="Node" parent="."]
+script = ExtResource("13")
+LevelTitle = "Fabrika"
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="Floor1" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -25)
+use_collision = true
+size = Vector3(30, 1, 70)
+material = SubResource("ground")
+
+[node name="Floor2" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -115)
+use_collision = true
+size = Vector3(30, 1, 70)
+material = SubResource("ground")
+
+[node name="Floor3" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -215)
+use_collision = true
+size = Vector3(30, 1, 90)
+material = SubResource("ground")
+
+[node name="Crate1" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -20)
+use_collision = true
+size = Vector3(3, 3, 3)
+material = SubResource("accent")
+
+[node name="Crate2" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -100)
+use_collision = true
+size = Vector3(3, 3, 3)
+material = SubResource("accent")
+
+[node name="Shaft" type="CSGBox3D" parent="Geometry" groups=["climbable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 6, -125)
+use_collision = true
+size = Vector3(6, 12, 8)
+material = SubResource("accent")
+
+[node name="Ramp1" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 0.9781, -0.2079, 0, 0.2079, 0.9781, 0, 0.7584, -55.9728)
+use_collision = true
+size = Vector3(8, 1, 12)
+material = SubResource("accent")
+
+[node name="Rails" type="Node3D" parent="."]
+
+[node name="RailPit1" type="Path3D" parent="Rails"]
+script = ExtResource("7")
+Points = PackedVector3Array(0, 2.2, -56, 0, 2, -70, 0, 1.2, -86)
+
+[node name="RailPit2" type="Path3D" parent="Rails"]
+script = ExtResource("7")
+Points = PackedVector3Array(0, 2.2, -146, 0, 2, -160, 0, 1.2, -176)
+
+[node name="PounceTargets" type="Node3D" parent="."]
+
+[node name="T1" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -72)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/T1"]
+mesh = SubResource("target_mesh")
+
+[node name="T2" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -158)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/T2"]
+mesh = SubResource("target_mesh")
+
+[node name="Fish" type="Node3D" parent="."]
+
+[node name="F1" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+
+[node name="F2" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -5)
+
+[node name="F3" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -10)
+
+[node name="F4" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -15)
+
+[node name="F5" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -20)
+
+[node name="F6" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -25)
+
+[node name="F7" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -30)
+
+[node name="F8" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -35)
+
+[node name="F9" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -40)
+
+[node name="F10" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -45)
+
+[node name="F11" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -52)
+
+[node name="F12" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1753, -56.2222)
+
+[node name="F13" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6568, -60.4444)
+
+[node name="F14" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.6444, -64.6667)
+
+[node name="F15" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1383, -68.8889)
+
+[node name="F16" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1383, -73.1111)
+
+[node name="F17" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.6444, -77.3333)
+
+[node name="F18" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6568, -81.5556)
+
+[node name="F19" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1753, -85.7778)
+
+[node name="F20" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -90)
+
+[node name="F21" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 13.2, -125)
+
+[node name="F22" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -95)
+
+[node name="F23" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -101.4286)
+
+[node name="F24" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -107.8571)
+
+[node name="F25" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -114.2857)
+
+[node name="F26" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -120.7143)
+
+[node name="F27" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -127.1429)
+
+[node name="F28" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -133.5714)
+
+[node name="F29" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -140)
+
+[node name="F30" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -148)
+
+[node name="F31" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592, -152.2857)
+
+[node name="F32" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4653, -156.5714)
+
+[node name="F33" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1184, -160.8571)
+
+[node name="F34" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1184, -165.1429)
+
+[node name="F35" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4653, -169.4286)
+
+[node name="F36" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1592, -173.7143)
+
+[node name="F37" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -178)
+
+[node name="F38" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -185)
+
+[node name="F39" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -190.4545)
+
+[node name="F40" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -195.9091)
+
+[node name="F41" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -201.3636)
+
+[node name="F42" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -206.8182)
+
+[node name="F43" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -212.2727)
+
+[node name="F44" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -217.7273)
+
+[node name="F45" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -223.1818)
+
+[node name="F46" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -228.6364)
+
+[node name="F47" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -234.0909)
+
+[node name="F48" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -239.5455)
+
+[node name="F49" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -245)
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="E1" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -18)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E2" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -95)
+PatrolOffset = Vector3(-8, 0, 0)
+
+[node name="E3" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -110)
+PatrolOffset = Vector3(0, 0, 6)
+
+[node name="E4" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -190)
+PatrolOffset = Vector3(0, 0, 8)
+
+[node name="E5" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -200)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E6" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -225)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E7" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 12, -125)
+PatrolOffset = Vector3(0, 0, 2)
+
+[node name="ConveyorBoost" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -25)
+script = ExtResource("5")
+Acceleration = Vector3(0, 0, -14)
+
+[node name="Shape" type="CollisionShape3D" parent="ConveyorBoost"]
+shape = SubResource("wind_1")
+
+[node name="ConveyorBack" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -115)
+script = ExtResource("5")
+Acceleration = Vector3(0, 0, 11)
+
+[node name="Shape" type="CollisionShape3D" parent="ConveyorBack"]
+shape = SubResource("wind_2")
+
+[node name="Lift1" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -70)
+script = ExtResource("6")
+Amplitude = Vector3(7, 0, 0)
+Frequency = 0.25
+SpinSpeed = 0.0
+
+[node name="Shape" type="CollisionShape3D" parent="Lift1"]
+shape = SubResource("plat_shape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Lift1"]
+mesh = SubResource("plat_mesh")
+
+[node name="Lift2" type="AnimatableBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -160)
+script = ExtResource("6")
+Amplitude = Vector3(0, 0, 5)
+Frequency = 0.25
+SpinSpeed = 0.0
+
+[node name="Shape" type="CollisionShape3D" parent="Lift2"]
+shape = SubResource("plat_shape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Lift2"]
+mesh = SubResource("plat_mesh")
+
+[node name="Loop" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -35)
+script = ExtResource("9")
+Radius = 8.0
+LateralOffset = -4.0
+
+[node name="Trigger" type="CollisionShape3D" parent="Loop"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("loop_trigger")
+
+[node name="CP1" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -95)
+
+[node name="CP2" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -185)
+
+[node name="StormCore" parent="." instance=ExtResource("12")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -252)

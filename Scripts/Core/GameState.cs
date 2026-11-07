@@ -12,6 +12,9 @@ public static class GameState
 	public static int CoreShards { get; private set; }
 	public static float LevelTime { get; set; }
 	public static bool LevelDone { get; private set; }
+	/// <summary>Boss health for the HUD (0 max = no boss in this level).</summary>
+	public static int BossHp { get; set; }
+	public static int BossMaxHp { get; set; }
 
 	public static event EventHandler FishChanged;
 	public static event EventHandler LivesChanged;

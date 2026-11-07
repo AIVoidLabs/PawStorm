@@ -34,7 +34,7 @@ public partial class LoopTrack : Area3D
 
 	private void BuildVisual()
 	{
-		var mat = new StandardMaterial3D { AlbedoColor = new Color(0.95f, 0.75f, 0.2f) };
+		var mat = new StandardMaterial3D { DiffuseMode = BaseMaterial3D.DiffuseModeEnum.Toon, SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled, AlbedoColor = new Color(0.95f, 0.75f, 0.2f) };
 		const int segments = 32;
 		for (int i = 0; i < segments; i++)
 		{

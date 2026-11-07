@@ -59,3 +59,9 @@ Storm Core adlı fırtına enerjisi şehri sarar ve sokak kedileri kaybolur. Pat
 
 ## Aşama 2 durumu
 Spin Dash (Pati Sprint: Shift/X basılı tut, bırak), Pounce (havada Space, kırmızı hedefe kilitlenir), Grind (havada raya yaklaşınca yakalar, Space ile çık) prototipte çalışıyor. Hedefler `PounceTarget`, raylar `GrindRail`. Duvar tırmanışı, Air Twist ve gerçek loop sonraki aşamada.
+
+## Durum (tüm planlanan adımlar prototip düzeyinde tamam)
+- **Mekanikler:** Spin Dash, Pounce, Grind, duvar tırmanışı (`climbable` grubu), Air Twist, loop (`LoopTrack`), hasar/9 Lives, balık düşürme, düşman, checkpoint, Storm Core ile bölüm bitişi.
+- **Bölgeler (gri kutu):** 1 Çatılar, 2 Liman, 3 Orman, 4 Fabrika, 5 Gökyüzü Adası, 6 Dr. Kennel boss. Sahne sırası `Scripts/Core/Levels.cs`. Bölüm 2-6 `Docs/tools/gen_levels.ps1` ile üretilir (elle düzenlenirse betik tekrar çalıştırılınca ezilir).
+- **Cilalama:** toon gölgelendirme, ters-gövde outline (`Art/Materials/Outline.*`), placeholder sesler (`Docs/tools/make_sfx.ps1`), ana menü, duraklatma (Esc/Start).
+- **Eksik:** gerçek modeller/animasyon, müzik, ekran-uzayı outline (küpsel zeminde outline yok), ayarlar menüsü, kaydetme, bölüm seçimi, gerçek boss çeşitliliği.

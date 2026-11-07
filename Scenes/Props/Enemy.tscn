@@ -1,11 +1,16 @@
 [gd_scene load_steps=7 format=3]
 
+[ext_resource type="Material" path="res://Art/Materials/Outline.tres" id="outline"]
+
 [ext_resource type="Script" path="res://Scripts/Enemies/Enemy.cs" id="1"]
 
 [sub_resource type="SphereShape3D" id="shape"]
 radius = 0.8
 
 [sub_resource type="StandardMaterial3D" id="brown"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
 albedo_color = Color(0.55, 0.35, 0.2, 1)
 
 [sub_resource type="CapsuleMesh" id="body"]
