@@ -11,6 +11,7 @@ public partial class IdleState : PlayerState
 		p.MoveAndSlide();
 		if (!p.IsOnFloor()) { Machine.Transition(PlayerStateId.Fall); return; }
 		if (p.JumpPressed()) { Machine.Transition(PlayerStateId.Jump); return; }
+		if (p.SpinPressed()) { Machine.Transition(PlayerStateId.Charge); return; }
 		if (p.InputDir.LengthSquared() > 0.01f || p.HorizontalSpeed > 0.5f)
 			Machine.Transition(PlayerStateId.Run);
 	}

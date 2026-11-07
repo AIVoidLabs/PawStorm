@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace PawStorm;
 
-public enum PlayerStateId { Idle, Run, Jump, Fall }
+public enum PlayerStateId { Idle, Run, Jump, Fall, Charge, Spin, Pounce, Grind }
 
 public partial class StateMachine
 {
@@ -16,7 +16,7 @@ public partial class StateMachine
 	public void Transition(PlayerStateId id)
 	{
 		if (Current != null && CurrentId == id) return;
-		PreviousWasGround = Current is IdleState || Current is RunState;
+		PreviousWasGround = Current is IdleState || Current is RunState || Current is SpinState;
 		Current?.Exit();
 		CurrentId = id;
 		Current = _states[id];

@@ -12,6 +12,11 @@ public partial class PlayerController : CharacterBody3D
 	public Vector3 InputDir { get; private set; }
 	public Vector3 ExternalAccel { get; set; }
 
+	public Node3D PounceTargetNode { get; private set; }
+	public GrindRail CurrentRail { get; private set; }
+	public float RailOffset { get; private set; }
+
+	private float _grindCooldown;
 	private Vector3 _spawn;
 	private float _jumpBuffer;
 	private const float JumpBufferTime = 0.12f;
@@ -32,17 +37,114 @@ public partial class PlayerController : CharacterBody3D
 		Machine.Register(PlayerStateId.Run, new RunState(this));
 		Machine.Register(PlayerStateId.Jump, new JumpState(this));
 		Machine.Register(PlayerStateId.Fall, new FallState(this));
+		Machine.Register(PlayerStateId.Charge, new ChargeState(this));
+		Machine.Register(PlayerStateId.Spin, new SpinState(this));
+		Machine.Register(PlayerStateId.Pounce, new PounceState(this));
+		Machine.Register(PlayerStateId.Grind, new GrindState(this));
 		Machine.Transition(PlayerStateId.Fall);
 	}
 
 	public override void _PhysicsProcess(double delta)
 	{
 		float dt = (float)delta;
+		_grindCooldown -= dt;
 		_jumpBuffer = Input.IsActionJustPressed("jump") ? JumpBufferTime : Mathf.Max(0f, _jumpBuffer - dt);
 		InputDir = ReadCameraRelativeInput();
 		Machine.Physics(dt);
 		UpdateVisual(dt);
 		if (GlobalPosition.Y < KillHeight) Respawn();
+	}
+
+	/// <summary>Current state name (debug / tests).</summary>
+	public string GetStateName() => Machine.CurrentId.ToString();
+
+	public bool SpinPressed() => Input.IsActionJustPressed("spin");
+
+	/// <summary>Horizontal direction the cat is currently facing.</summary>
+	public Vector3 Facing
+	{
+		get
+		{
+			Vector3 f = Visual != null ? -Visual.GlobalTransform.Basis.Z : -GlobalTransform.Basis.Z;
+			f.Y = 0;
+			return f.LengthSquared() > 0.0001f ? f.Normalized() : Vector3.Forward;
+		}
+	}
+
+	public void FaceDirection(Vector3 dir, float dt)
+	{
+		if (Visual == null || dir.LengthSquared() < 0.0001f) return;
+		Vector3 r = Visual.Rotation;
+		r.Y = Mathf.LerpAngle(r.Y, Mathf.Atan2(-dir.X, -dir.Z), Mathf.Clamp(20f * dt, 0f, 1f));
+		Visual.Rotation = r;
+	}
+
+	public void StartGrindCooldown() => _grindCooldown = Stats.GrindCooldown;
+
+	/// <summary>Homing attack: lock the nearest pounce target in front and switch to the Pounce state.</summary>
+	public bool TryPounce()
+	{
+		Vector3 fwd = InputDir.LengthSquared() > 0.01f ? InputDir.Normalized()
+			: HorizontalSpeed > 1f ? new Vector3(Velocity.X, 0, Velocity.Z).Normalized() : Facing;
+		Node3D best = null;
+		float bestDist = float.MaxValue;
+		foreach (Node n in GetTree().GetNodesInGroup("pounce_target"))
+		{
+			if (n is not Node3D t) continue;
+			Vector3 to = t.GlobalPosition - GlobalPosition;
+			float d = to.Length();
+			if (d > Stats.PounceRange || d < 0.5f) continue;
+			Vector3 h = new Vector3(to.X, 0, to.Z);
+			if (h.LengthSquared() > 0.01f && h.Normalized().Dot(fwd) < 0.2f) continue;
+			if (d < bestDist) { best = t; bestDist = d; }
+		}
+		if (best == null) return false;
+		PounceTargetNode = best;
+		ConsumeJump();
+		Machine.Transition(PlayerStateId.Pounce);
+		return true;
+	}
+
+	/// <summary>Grab a rail when falling close to it.</summary>
+	public bool TryStartGrind()
+	{
+		if (_grindCooldown > 0f || Velocity.Y > 0f) return false;
+		Vector3 center = GlobalPosition + Vector3.Up * 0.2f;
+		foreach (Node n in GetTree().GetNodesInGroup("grind_rail"))
+		{
+			if (n is not GrindRail rail || rail.Curve == null) continue;
+			float off = rail.ClosestOffset(center);
+			if (rail.WorldPointAt(off).DistanceTo(center) > Stats.GrindSnapDistance) continue;
+			CurrentRail = rail;
+			RailOffset = off;
+			Machine.Transition(PlayerStateId.Grind);
+			return true;
+		}
+		return false;
+	}
+
+	/// <summary>Rolling movement: low friction, boosted slope gain, weak steering.</summary>
+	public void ApplyRollMovement(float dt)
+	{
+		Vector3 n = IsOnFloor() ? GetFloorNormal() : Vector3.Up;
+		Vector3 vel = Velocity.Slide(n);
+		vel += (Vector3.Down * Stats.Gravity).Slide(n) * (Stats.SlopeForce / Stats.Gravity) * Stats.RollSlopeMultiplier * dt;
+		float speed = vel.Length();
+		if (speed > 0.05f)
+		{
+			Vector3 dir = vel / speed;
+			if (InputDir.LengthSquared() > 0.01f)
+			{
+				Vector3 wish = InputDir.Slide(n).Normalized();
+				if (dir.Dot(wish) < -0.3f) speed -= Stats.TurnDrag * 0.25f * dt;
+				else dir = dir.Slerp(wish, Mathf.Clamp(Stats.RollTurnRate * dt, 0f, 1f)).Normalized();
+			}
+			speed = Mathf.Max(0f, speed - Stats.RollFriction * dt);
+			vel = dir * speed;
+		}
+		vel += ExternalAccel.Slide(n) * Stats.WindForceMultiplier * dt;
+		Velocity = vel - n * 0.5f;
+		TryStepUp(dt);
 	}
 
 	public bool JumpPressed() => _jumpBuffer > 0f;
@@ -142,6 +244,9 @@ public partial class PlayerController : CharacterBody3D
 	private void UpdateVisual(float dt)
 	{
 		if (Visual == null) return;
+		bool ball = Machine.CurrentId == PlayerStateId.Charge || Machine.CurrentId == PlayerStateId.Spin;
+		Visual.Scale = Visual.Scale.Lerp(ball ? new Vector3(1, 0.6f, 1) : Vector3.One, Mathf.Clamp(15f * dt, 0f, 1f));
+		if (Machine.CurrentId == PlayerStateId.Charge) return;
 		Vector3 h = new Vector3(Velocity.X, 0, Velocity.Z);
 		if (h.LengthSquared() > 0.25f)
 		{

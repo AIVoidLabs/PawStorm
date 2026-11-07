@@ -56,3 +56,6 @@ Storm Core adlı fırtına enerjisi şehri sarar ve sokak kedileri kaybolur. Pat
 - **.NET / Godot sürüm uyumu:** Godot 4.7.2 mono sürümü kullanılıyor. Sürüm uyumsuzluğu derleme ve çalışma sorunlarına yol açabilir.
 - **Kapsam şişmesi:** Beş bölgenin tamamı aynı anda yapılmaya çalışılırsa proje dağılır. Önce Bölüm 1 bitirilir.
 - **Git LFS:** Büyük binary varlıklar (*.glb, *.png, *.wav, *.ogg) LFS ile tutulur. LFS kurulu değilse dosyalar bozuk gelir.
+
+## Aşama 2 durumu
+Spin Dash (Pati Sprint: Shift/X basılı tut, bırak), Pounce (havada Space, kırmızı hedefe kilitlenir), Grind (havada raya yaklaşınca yakalar, Space ile çık) prototipte çalışıyor. Hedefler `PounceTarget`, raylar `GrindRail`. Duvar tırmanışı, Air Twist ve gerçek loop sonraki aşamada.

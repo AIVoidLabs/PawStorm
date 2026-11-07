@@ -6,6 +6,18 @@
 [ext_resource type="Script" path="res://Scripts/Camera/FollowCamera.cs" id="4"]
 [ext_resource type="Script" path="res://Scripts/Core/WindZone.cs" id="5"]
 [ext_resource type="Script" path="res://Scripts/Core/FloatingProp.cs" id="6"]
+[ext_resource type="Script" path="res://Scripts/Core/GrindRail.cs" id="7"]
+[ext_resource type="Script" path="res://Scripts/Enemies/PounceTarget.cs" id="8"]
+
+[sub_resource type="StandardMaterial3D" id="target_mat"]
+albedo_color = Color(1, 0.2, 0.2, 1)
+emission_enabled = true
+emission = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="target_mesh"]
+material = SubResource("target_mat")
+radius = 0.5
+height = 1.0
 
 [sub_resource type="StandardMaterial3D" id="roof"]
 albedo_color = Color(0.55, 0.55, 0.6, 1)
@@ -318,3 +330,36 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1177, 1.2, -189)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6279, 1.2, -193)
 
 
+
+[node name="Rails" type="Node3D" parent="."]
+
+[node name="RailGap" type="Path3D" parent="Rails"]
+script = ExtResource("7")
+Points = PackedVector3Array(0, 2.2, -133, 0, 2.1, -147, 0, 1.7, -159, 0, 1.0, -172)
+
+[node name="RailHill" type="Path3D" parent="Rails"]
+script = ExtResource("7")
+Points = PackedVector3Array(-10, 1.2, -60, -10, 1.2, -95)
+
+[node name="PounceTargets" type="Node3D" parent="."]
+
+[node name="Target1" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -60)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/Target1"]
+mesh = SubResource("target_mesh")
+
+[node name="Target2" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -90)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/Target2"]
+mesh = SubResource("target_mesh")
+
+[node name="Target3" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 5, -178)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/Target3"]
+mesh = SubResource("target_mesh")

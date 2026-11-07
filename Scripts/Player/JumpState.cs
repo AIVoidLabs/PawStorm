@@ -28,8 +28,10 @@ public partial class JumpState : PlayerState
 			p.Velocity = v;
 			_cut = true;
 		}
+		if (p.JumpPressed() && p.TryPounce()) return;
 		p.ApplyAirMovement(dt);
 		p.MoveAndSlide();
+		if (p.TryStartGrind()) return;
 		if (p.IsOnFloor() && p.Velocity.Y <= 0.1f) { p.Land(); return; }
 		if (p.Velocity.Y <= 0f) Machine.Transition(PlayerStateId.Fall);
 	}

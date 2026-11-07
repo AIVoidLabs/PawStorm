@@ -30,6 +30,28 @@ public partial class PlayerStats : Resource
 	[Export] public float MaxFloorAngleDeg { get; set; } = 60f;
 	[Export] public float StepHeight { get; set; } = 0.5f;
 
+	[ExportGroup("Spin")]
+	[Export] public float ChargeMaxEntrySpeed { get; set; } = 3f;
+	[Export] public float SpinChargeTime { get; set; } = 0.8f;
+	[Export] public float SpinDashMinSpeed { get; set; } = 18f;
+	[Export] public float SpinDashMaxSpeed { get; set; } = 55f;
+	[Export] public float RollFriction { get; set; } = 2f;
+	[Export] public float RollSlopeMultiplier { get; set; } = 1.5f;
+	[Export] public float RollTurnRate { get; set; } = 2.5f;
+	[Export] public float RollMinSpeed { get; set; } = 4f;
+
+	[ExportGroup("Pounce")]
+	[Export] public float PounceRange { get; set; } = 14f;
+	[Export] public float PounceSpeed { get; set; } = 55f;
+	[Export] public float PounceBounce { get; set; } = 11f;
+	[Export] public float PounceMaxTime { get; set; } = 0.6f;
+
+	[ExportGroup("Grind")]
+	[Export] public float GrindMinSpeed { get; set; } = 14f;
+	[Export] public float GrindGravityFactor { get; set; } = 0.8f;
+	[Export] public float GrindSnapDistance { get; set; } = 1.0f;
+	[Export] public float GrindCooldown { get; set; } = 0.3f;
+
 	[ExportGroup("Wind")]
 	[Export] public float WindForceMultiplier { get; set; } = 1f;
 

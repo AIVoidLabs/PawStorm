@@ -11,6 +11,11 @@ public partial class RunState : PlayerState
 		p.MoveAndSlide();
 		if (!p.IsOnFloor()) { Machine.Transition(PlayerStateId.Fall); return; }
 		if (p.JumpPressed()) { Machine.Transition(PlayerStateId.Jump); return; }
+		if (p.SpinPressed())
+		{
+			Machine.Transition(p.HorizontalSpeed > Stats.ChargeMaxEntrySpeed ? PlayerStateId.Spin : PlayerStateId.Charge);
+			return;
+		}
 		if (p.InputDir.LengthSquared() < 0.01f && p.HorizontalSpeed < 0.3f)
 			Machine.Transition(PlayerStateId.Idle);
 	}

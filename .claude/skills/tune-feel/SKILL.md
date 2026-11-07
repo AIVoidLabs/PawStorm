@@ -34,3 +34,18 @@ Karakterin tüm fizik sabitleri `Resources/PlayerStats.tres` (C# Resource) için
 - `Gravity` yüksekken `JumpVelocity` da artırılmazsa zıplama kısa kalır.
 - `MaxSpeed` artırıldıkça `TurnDrag` ve `AirControl` ile birlikte dengelenmeli. Yoksa karakter kontrolden çıkar.
 - `FovMax` çok yüksek olursa görüntü bozulur ve mide bulandırabilir. Makul aralık için küçük adımlarla ilerle.
+
+## Aşama 2 alanları (Spin / Pounce / Grind)
+
+| Alan | Etkisi |
+|---|---|
+| SpinChargeTime | Tam şarj için basılı tutma süresi (sn). Düşür = daha hızlı sprint. |
+| SpinDashMinSpeed / SpinDashMaxSpeed | Sprint fırlama hızı aralığı. |
+| RollFriction | Top halinde yavaşlama. Düşür = daha uzun yuvarlanma. |
+| RollSlopeMultiplier | Top halinde eğimde ekstra hız kazancı. |
+| RollTurnRate / RollMinSpeed | Top halinde dönüş; bu hızın altında koşuya döner. |
+| ChargeMaxEntrySpeed | Bu hızın altında Spin tuşu şarj, üstünde direkt yuvarlanma. |
+| PounceRange / PounceSpeed | Hedef kilitleme mesafesi ve uçuş hızı. |
+| PounceBounce / PounceMaxTime | Çarpma sonrası zıplama; zaman aşımı. |
+| GrindMinSpeed / GrindGravityFactor | Rayda minimum hız; eğimde hız kazancı. |
+| GrindSnapDistance / GrindCooldown | Ray yakalama mesafesi; raydan çıkınca tekrar yakalama bekleme süresi. |
