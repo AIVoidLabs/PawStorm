@@ -16,6 +16,7 @@ public partial class Enemy : Area3D, IPounceable
 	public override void _Ready()
 	{
 		AddToGroup("pounce_target");
+		new ModelAnimator(this).PlayRandomOffset("Walk", 1f);
 		_origin = Position;
 		_t = GD.Randf() * Mathf.Tau;
 	}

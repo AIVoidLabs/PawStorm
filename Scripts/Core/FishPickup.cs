@@ -18,6 +18,7 @@ public partial class FishPickup : Area3D
 	{
 		_basePos = Position;
 		_t = GD.Randf() * Mathf.Tau;
+		new ModelAnimator(this).PlayRandomOffset("Swim", 1.2f);
 		BodyEntered += b => { if (_age >= Delay) Collect(b); };
 	}
 

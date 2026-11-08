@@ -68,3 +68,6 @@ Spin Dash (Pati Sprint: Shift/X basÄ±lÄ± tut, bÄ±rak), Pounce (havada Space, kÄ±
 
 ## Modeller
 Pati, Pup (düþman), Dr. Kennel, Balýk, Storm Core, Checkpoint, Sandýk ve Aðaç Blender ile betikle üretilir: `Docs/tools/blender/make_models.py` -> `Art/Models/*.glb`. Oyunda `ToonModel` betiði toon + outline uygular. Animasyon yok (statik poz), kemik kurulumu sonraki iþ.
+
+## Animasyon
+Pati (Idle, Run, Jump, Fall, Ball, Charge, Hurt, Grind, Climb), Pup (Walk), Dr. Kennel (Hover, Charge, Stunned) ve Balýk (Swim) Blender'da kemiklendirilip klipleri GLB'ye gömülür (`make_models.py`). Oyunda `ModelAnimator` durumlara göre klip seçer. Katý parçalar tek kemiðe aðýrlýklýdýr (yumuþak deri yok).

@@ -32,7 +32,11 @@ public partial class DrKennel : Area3D, IPounceable
 		GameState.BossMaxHp = MaxHp;
 		GameState.BossHp = _hp;
 		_player = GetTree().GetFirstNodeInGroup("player") as PlayerController;
+		_anim = new ModelAnimator(this);
+		_anim.Play("Hover");
 	}
+
+	private ModelAnimator _anim;
 
 	public override void _ExitTree() { GameState.BossMaxHp = 0; GameState.BossHp = 0; }
 
@@ -84,6 +88,12 @@ public partial class DrKennel : Area3D, IPounceable
 	{
 		_phase = p;
 		_t = 0f;
+		_anim.Play(p switch
+		{
+			Phase.Telegraph or Phase.Charge => "Charge",
+			Phase.Stunned => "Stunned",
+			_ => "Hover",
+		}, 1f, 0.15f);
 		switch (p)
 		{
 			case Phase.Hover: Tint(null); _hover = _hp == 1 ? 2f : _hp == 2 ? 3f : 4f; break;

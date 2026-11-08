@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 MaxSpeed = 24
-Acceleration = 14
+Acceleration = 9
 OverspeedFriction = 8
 Deceleration = 30
 Friction = 10

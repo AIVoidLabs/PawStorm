@@ -7,7 +7,7 @@ public partial class PlayerStats : Resource
 {
 	[ExportGroup("Run")]
 	[Export] public float MaxSpeed { get; set; } = 24f;
-	[Export] public float Acceleration { get; set; } = 14f;
+	[Export] public float Acceleration { get; set; } = 9f;
 	[Export] public float OverspeedFriction { get; set; } = 8f;
 	[Export] public float Deceleration { get; set; } = 30f;
 	[Export] public float Friction { get; set; } = 10f;

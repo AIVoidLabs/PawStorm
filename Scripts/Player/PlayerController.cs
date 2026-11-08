@@ -29,6 +29,7 @@ public partial class PlayerController : CharacterBody3D
 		AddToGroup("player");
 		Stats ??= new PlayerStats();
 		_spawn = _firstSpawn = GlobalPosition;
+		_anim = new ModelAnimator(Visual);
 		FloorMaxAngle = Mathf.DegToRad(Stats.MaxFloorAngleDeg);
 		FloorStopOnSlope = false;
 		FloorSnapLength = 0.6f;
@@ -421,12 +422,35 @@ public partial class PlayerController : CharacterBody3D
 		Velocity = v;
 	}
 
+	private ModelAnimator _anim;
+
+	/// <summary>Pick the baked clip that matches the current state.</summary>
+	private void UpdateAnimation()
+	{
+		switch (Machine.CurrentId)
+		{
+			case PlayerStateId.Idle: _anim.Play("Idle"); break;
+			case PlayerStateId.Run: _anim.Play("Run", Mathf.Clamp(HorizontalSpeed / 7f, 0.6f, 2.5f)); break;
+			case PlayerStateId.Loop: _anim.Play("Run", 2.5f); break;
+			case PlayerStateId.Jump: _anim.Play("Jump"); break;
+			case PlayerStateId.Fall: _anim.Play("Fall"); break;
+			case PlayerStateId.Charge: _anim.Play("Charge"); break;
+			case PlayerStateId.Spin: case PlayerStateId.Pounce: _anim.Play("Ball"); break;
+			case PlayerStateId.Hurt: _anim.Play("Hurt"); break;
+			case PlayerStateId.Grind: _anim.Play("Grind"); break;
+			case PlayerStateId.WallClimb:
+				_anim.Play("Climb", Mathf.Abs(Input.GetAxis("move_back", "move_forward")) > 0.1f ? 1f : 0.05f);
+				break;
+		}
+	}
+
 	private void UpdateVisual(float dt)
 	{
 		if (Visual == null) return;
+		UpdateAnimation();
 		var id = Machine.CurrentId;
 		bool ball = id == PlayerStateId.Charge || id == PlayerStateId.Spin || id == PlayerStateId.Pounce;
-		Visual.Scale = Visual.Scale.Lerp(ball ? new Vector3(1, 0.6f, 1) : Vector3.One, Mathf.Clamp(15f * dt, 0f, 1f));
+		Visual.Scale = Visual.Scale.Lerp(ball ? new Vector3(1, 0.8f, 1) : Vector3.One, Mathf.Clamp(15f * dt, 0f, 1f));
 		// Pounce / Spin: roll forward like a ball; otherwise ease back upright.
 		var rot = Visual.Rotation;
 		rot.X = id == PlayerStateId.Pounce || id == PlayerStateId.Spin
