@@ -137,6 +137,7 @@ public partial class DrKennel : Area3D, IPounceable
 		_hp--;
 		GameState.BossHp = _hp;
 		Sfx.Play(this, "hit");
+		Vfx.BossHit(this, GlobalPosition + Vector3.Up * 1.5f);
 		RemoveFromGroup("pounce_target");
 		if (_hp <= 0) { Defeat(); return; }
 		SetPhase(Phase.Recover);
@@ -147,6 +148,7 @@ public partial class DrKennel : Area3D, IPounceable
 		_phase = Phase.Defeated;
 		Tint(new Color(1f, 1f, 1f));
 		Sfx.Play(this, "core");
+		Vfx.BossDefeat(this, GlobalPosition + Vector3.Up * 1.5f);
 		var tween = CreateTween();
 		tween.TweenProperty(this, "scale", Vector3.One * 0.01f, 1.2f);
 		tween.TweenCallback(Callable.From(() => { GameState.CompleteLevel(); QueueFree(); }));

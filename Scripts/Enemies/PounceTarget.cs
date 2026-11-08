@@ -18,6 +18,8 @@ public partial class PounceTarget : Node3D, IPounceable
 	public void Hit()
 	{
 		GameState.AddFish(FishReward);
+		Vfx.TargetPop(this, GlobalPosition, FishReward);
+		Sfx.Play(this, "hit", -2f, 0.1f);
 		QueueFree();
 	}
 }

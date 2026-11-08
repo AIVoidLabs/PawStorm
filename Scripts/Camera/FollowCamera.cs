@@ -16,10 +16,21 @@ public partial class FollowCamera : Node3D
 	public override void _Ready()
 	{
 		TopLevel = true;
+		AddToGroup("follow_camera");
 		Arm.SpringLength = Stats.CameraDistance;
 		Arm.AddExcludedObject(Target.GetRid());
 		GlobalPosition = Target.GlobalPosition + FocusOffset;
 		Input.MouseMode = Input.MouseModeEnum.Captured;
+	}
+
+	private float _shakeTime, _shakeAmp;
+
+	/// <summary>Short camera shake (hits, explosions).</summary>
+	public void Shake(float amplitude, float duration)
+	{
+		if (amplitude * duration < _shakeAmp * _shakeTime) return; // keep the stronger one
+		_shakeAmp = amplitude;
+		_shakeTime = duration;
 	}
 
 	/// <summary>Set the orbit angles directly (used by the menu-screenshot tool).</summary>
@@ -50,6 +61,15 @@ public partial class FollowCamera : Node3D
 		Vector3 goal = Target.GlobalPosition + FocusOffset;
 		GlobalPosition = GlobalPosition.Lerp(goal, 1f - Mathf.Exp(-Stats.CameraFollowSpeed * dt));
 		Rotation = new Vector3(_pitch, _yaw, 0);
+
+		if (_shakeTime > 0f)
+		{
+			_shakeTime -= dt;
+			float k = _shakeAmp * Mathf.Clamp(_shakeTime * 6f, 0f, 1f);
+			Cam.HOffset = (GD.Randf() * 2f - 1f) * k;
+			Cam.VOffset = (GD.Randf() * 2f - 1f) * k;
+		}
+		else if (Cam.HOffset != 0f || Cam.VOffset != 0f) { Cam.HOffset = 0f; Cam.VOffset = 0f; }
 
 		float t = Mathf.Clamp(Target.Speed / Stats.MaxSpeed, 0f, 1f);
 		Cam.Fov = Mathf.Lerp(Cam.Fov, Mathf.Lerp(Stats.FovMin, Stats.FovMax, t), 1f - Mathf.Exp(-4f * dt));

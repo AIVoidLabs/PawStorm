@@ -49,8 +49,13 @@ public partial class Enemy : Area3D, IPounceable
 	{
 		if (_dead) return;
 		_dead = true;
+		SetDeferred(Area3D.PropertyName.Monitoring, false);
 		GameState.AddFish(FishReward);
-		Sfx.Play(this, "hit");
-		QueueFree();
+		Vfx.EnemyDefeat(this, GlobalPosition + Vector3.Up * 0.8f, FishReward);
+		// squash flat and spin while the burst plays, then disappear
+		var tw = CreateTween().SetParallel();
+		tw.TweenProperty(this, "scale", new Vector3(1.5f, 0.12f, 1.5f), 0.12f).SetEase(Tween.EaseType.Out);
+		tw.TweenProperty(this, "rotation:y", Rotation.Y + 1.5f, 0.12f);
+		tw.Chain().TweenCallback(Callable.From(QueueFree));
 	}
 }
