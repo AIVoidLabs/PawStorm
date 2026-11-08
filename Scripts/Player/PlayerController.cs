@@ -446,6 +446,10 @@ public partial class PlayerController : CharacterBody3D
 	}
 
 	private ModelAnimator _anim;
+	/// <summary>Height of the visual pivot (body centre) above the feet; must match Visual/Model offsets in Player.tscn.</summary>
+	private const float PivotHeight = 0.62f;
+	/// <summary>Uniform scale of the curled-up cat while rolling.</summary>
+	private const float BallScale = 0.64f;
 
 	/// <summary>Pick the baked clip that matches the current state.</summary>
 	private void UpdateAnimation()
@@ -472,8 +476,13 @@ public partial class PlayerController : CharacterBody3D
 		if (Visual == null) return;
 		UpdateAnimation();
 		var id = Machine.CurrentId;
-		bool ball = id == PlayerStateId.Charge || id == PlayerStateId.Spin || id == PlayerStateId.Pounce;
-		Visual.Scale = Visual.Scale.Lerp(ball ? new Vector3(1, 0.8f, 1) : Vector3.One, Mathf.Clamp(15f * dt, 0f, 1f));
+		// Visual's origin is the body centre (PivotHeight above the feet), so rolling spins around the middle of the cat.
+		// Rolling (Spin/Pounce): shrink into a ball that fits between the pivot and the ground, so nothing dips into the floor.
+		// Otherwise keep the feet on the ground while squashing (Charge crouch).
+		bool rolling = id == PlayerStateId.Spin || id == PlayerStateId.Pounce;
+		Vector3 targetScale = rolling ? Vector3.One * BallScale : id == PlayerStateId.Charge ? new Vector3(1, 0.85f, 1) : Vector3.One;
+		Visual.Scale = Visual.Scale.Lerp(targetScale, Mathf.Clamp(15f * dt, 0f, 1f));
+		Visual.Position = new Vector3(0, rolling ? PivotHeight : PivotHeight * Visual.Scale.Y, 0);
 		// Pounce / Spin: roll forward like a ball; otherwise ease back upright.
 		var rot = Visual.Rotation;
 		rot.X = id == PlayerStateId.Pounce || id == PlayerStateId.Spin

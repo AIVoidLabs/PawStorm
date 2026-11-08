@@ -34,9 +34,9 @@ public partial class PlayerStats : Resource
 	[ExportGroup("Spin")]
 	[Export] public float ChargeMaxEntrySpeed { get; set; } = 3f;
 	[Export] public float SpinChargeTime { get; set; } = 0.8f;
-	[Export] public float SpinDashMinSpeed { get; set; } = 18f;
-	[Export] public float SpinDashMaxSpeed { get; set; } = 55f;
-	[Export] public float RollFriction { get; set; } = 2f;
+	[Export] public float SpinDashMinSpeed { get; set; } = 14f;
+	[Export] public float SpinDashMaxSpeed { get; set; } = 36f;
+	[Export] public float RollFriction { get; set; } = 12f;
 	[Export] public float RollSlopeMultiplier { get; set; } = 1.5f;
 	[Export] public float RollTurnRate { get; set; } = 2.5f;
 	[Export] public float RollMinSpeed { get; set; } = 4f;
