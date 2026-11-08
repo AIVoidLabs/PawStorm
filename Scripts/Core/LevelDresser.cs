@@ -11,6 +11,8 @@ public partial class LevelDresser : Node
 	[Export] public PackedScene GroundTile { get; set; }
 	[Export] public PackedScene RampTile { get; set; }
 	[Export] public float TileSize { get; set; } = 4f;
+	/// <summary>Tile surface patterns stand a few cm proud of the collision top; sink the tiles so paws touch the visible floor.</summary>
+	[Export] public float SurfaceSink { get; set; } = 0.045f;
 
 	public override void _Ready()
 	{
@@ -38,7 +40,7 @@ public partial class LevelDresser : Node
 		for (int ix = 0; ix < nx; ix++)
 			for (int iz = 0; iz < nz; iz++)
 			{
-				var pos = new Vector3(-size.X / 2f + (ix + 0.5f) * tw, size.Y / 2f, -size.Z / 2f + (iz + 0.5f) * tl);
+				var pos = new Vector3(-size.X / 2f + (ix + 0.5f) * tw, size.Y / 2f - SurfaceSink, -size.Z / 2f + (iz + 0.5f) * tl);
 				mm.SetInstanceTransform(i++, new Transform3D(basis, pos));
 			}
 		box.Layers = 0; // stop rendering, collision is unaffected

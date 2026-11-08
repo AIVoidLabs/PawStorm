@@ -220,6 +220,10 @@ def finish(name, bones=None, clips=None):
     obj = bpy.context.active_object
     obj.name = name
     obj.data.name = name
+    # Joining keeps the first part's origin; put the origin back at the world origin so the exported mesh
+    # (which Godot code may use on its own, e.g. MultiMesh tiles) is not offset.
+    bpy.context.scene.cursor.location = (0, 0, 0)
+    bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
     export_objs = [obj]
     if PREVIEW:
         setup_preview(obj)

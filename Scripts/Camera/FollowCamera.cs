@@ -22,6 +22,14 @@ public partial class FollowCamera : Node3D
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 	}
 
+	/// <summary>Set the orbit angles directly (used by the menu-screenshot tool).</summary>
+	public void SetView(float yaw, float pitch, float distance)
+	{
+		_yaw = yaw; _pitch = pitch;
+		Stats.CameraDistance = distance;
+		Arm.SpringLength = distance;
+	}
+
 	public override void _UnhandledInput(InputEvent e)
 	{
 		if (e is InputEventMouseMotion m && Input.MouseMode == Input.MouseModeEnum.Captured)

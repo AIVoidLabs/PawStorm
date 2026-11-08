@@ -17,7 +17,15 @@ public partial class LevelController : Node
 		AddToGroup("level_controller");
 		GameState.BeginLevel();
 		GetTree().Paused = false;
+		var info = Levels.For(GetTree().CurrentScene?.SceneFilePath ?? "");
+		if (info != null)
+		{
+			Music.Play(this, info.Music);
+			Sfx.SetLoop(this, ref _ambient, "Ambient/" + info.Ambient, true, 0f, AudioSettings.AmbientBus);
+		}
 	}
+
+	private AudioStreamPlayer _ambient;
 
 	public override void _Process(double delta)
 	{

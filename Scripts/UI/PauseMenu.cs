@@ -6,29 +6,36 @@ namespace PawStorm;
 public partial class PauseMenu : CanvasLayer
 {
 	private Control _root;
+	private Button _resume;
 
 	public override void _Ready()
 	{
 		Layer = 10;
 		ProcessMode = ProcessModeEnum.Always;
-		_root = new Control { Visible = false };
+		_root = new Control { Visible = false, ProcessMode = ProcessModeEnum.Always };
 		_root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		AddChild(_root);
 
-		var dim = new ColorRect { Color = new Color(0, 0, 0, 0.6f) };
+		var dim = new ColorRect { Color = new Color(0.03f, 0.02f, 0.08f, 0.65f) };
 		dim.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 		_root.AddChild(dim);
 
-		var box = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
-		box.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-		box.AddThemeConstantOverride("separation", 16);
-		_root.AddChild(box);
+		var panel = UiStyle.MakePanel(36);
+		panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center);
+		panel.GrowHorizontal = Control.GrowDirection.Both;
+		panel.GrowVertical = Control.GrowDirection.Both;
+		_root.AddChild(panel);
 
-		var title = new Label { Text = "Duraklatıldı", HorizontalAlignment = HorizontalAlignment.Center };
-		title.AddThemeFontSizeOverride("font_size", 56);
-		box.AddChild(title);
-		box.AddChild(MakeButton("Devam", () => SetPaused(false)));
-		box.AddChild(MakeButton("Ana Menü", () => GetTree().ChangeSceneToFile(Levels.MainMenu)));
+		var v = new VBoxContainer();
+		v.AddThemeConstantOverride("separation", 18);
+		panel.AddChild(v);
+		v.AddChild(UiStyle.MakeLabel("Duraklatıldı", 48, new Color(1f, 0.78f, 0.2f), outline: true));
+		v.AddChild(UiStyle.MakeSlider("Müzik", AudioSettings.MusicVolume, AudioSettings.SetMusicVolume));
+		v.AddChild(UiStyle.MakeSlider("Efektler", AudioSettings.SfxVolume, AudioSettings.SetSfxVolume));
+		_resume = UiStyle.MakeButton("Devam", () => SetPaused(false));
+		v.AddChild(_resume);
+		v.AddChild(UiStyle.MakeButton("Bölümü Yeniden Başlat", () => { SetPaused(false); GameState.BeginLevel(); GetTree().ReloadCurrentScene(); }, 26));
+		v.AddChild(UiStyle.MakeButton("Ana Menü", () => { SetPaused(false); GetTree().ChangeSceneToFile(Levels.MainMenu); }));
 	}
 
 	public override void _UnhandledInput(InputEvent e)
@@ -41,13 +48,7 @@ public partial class PauseMenu : CanvasLayer
 		GetTree().Paused = paused;
 		_root.Visible = paused;
 		Input.MouseMode = paused ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
-	}
-
-	private static Button MakeButton(string text, System.Action onPressed)
-	{
-		var b = new Button { Text = text, CustomMinimumSize = new Vector2(260, 52), SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter };
-		b.AddThemeFontSizeOverride("font_size", 26);
-		b.Pressed += onPressed;
-		return b;
+		Music.Duck(paused);
+		if (paused) _resume.GrabFocus();
 	}
 }

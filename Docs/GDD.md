@@ -74,3 +74,6 @@ Pati (Idle, Run, Jump, Fall, Ball, Charge, Hurt, Grind, Climb), Pup (Walk), Dr. 
 
 ## Ortam kiti
 `Docs/tools/blender/make_environment.py` -> `Art/Models/Env/*.glb`: zemin ve rampa karolarý, kenar korkuluklarý, dekor (bina, vinç, fener, kaya, boru, gaz bacasý, bulut...). `LevelDresser` CSG zeminlerini (metadata `skin`) karo MultiMesh'iyle kaplar, `BarrierLine` iki kenara korkuluk + görünmez çarpýþma duvarý koyar (layer 2; oyuncu maskesi 3, kamera kolu çarpmaz). Bölüm 2-6 `gen_levels.ps1` ile üretilir.
+
+## Ses ve menü
+Ses: `Docs/tools/audio/make_audio.py` (Blender'ýn Python'u + numpy ile sentez) -> `Audio/Music` (menü, 5 bölge, boss; 16 ölçülük döngüler), `Audio/Ambient` (rüzgâr, dalga, fabrika uðultusu, orman kuþlarý...), ek efektler. `AudioSettings` Music/SFX/Ambient bus'larýný açar ve ayarý `user://settings.cfg`'ye kaydeder; `Music` bölümler arasý çapraz geçiþ yapar. Menü: `Art/Textures/Menu/*.png` (`Docs/tools/capture_scene.gd` ile oyundan çekilir), `MainMenu` + `UiStyle`.

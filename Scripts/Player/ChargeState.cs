@@ -14,7 +14,10 @@ public partial class ChargeState : PlayerState
 	{
 		_charge = 0f;
 		_aim = Player.Facing;
+		Player.SetChargeSound(true);
 	}
+
+	public override void Exit() => Player.SetChargeSound(false);
 
 	public override void Physics(float dt)
 	{

@@ -59,7 +59,7 @@ def grass_tile():
     box((0, 0, -0.625), (4, 4, 0.75), mat("dirt", (0.45, 0.3, 0.2)))
     box((0, 0, -0.125), (4, 4, 0.25), mat("grass", (0.32, 0.7, 0.28)))
     for x, y in ((-1.1, -1.1), (1.1, -0.9), (-0.8, 1.2), (1.2, 1.2)):
-        add("cone", (x, y, 0.12), mat("tuft", (0.42, 0.82, 0.35)), r=0.12, d=0.28, seg=5, smooth=False)
+        add("cone", (x, y, 0.07), mat("tuft", (0.42, 0.82, 0.35)), r=0.1, d=0.14, seg=5, smooth=False)
 
 
 def factory_tile():
@@ -74,7 +74,7 @@ def cloud_tile():
     box((0, 0, -0.5), (4, 4, 1), mat("base", (0.82, 0.85, 0.97)))
     w = mat("puff", (0.96, 0.96, 1.0))
     for x, y, r in ((-1.0, -1.0, 0.9), (1.0, -0.8, 0.8), (0.0, 0.2, 1.0), (-1.1, 1.1, 0.8), (1.1, 1.2, 0.85)):
-        add("ico", (x, y, -0.02), w, scale=(1, 1, 0.12), r=r, sub=2)
+        add("ico", (x, y, -0.03), w, scale=(1, 1, 0.05), r=r, sub=2)
 
 
 def stripe_tile(a, b, emissive=0.0):

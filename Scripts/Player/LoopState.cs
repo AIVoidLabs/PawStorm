@@ -15,6 +15,7 @@ public partial class LoopState : PlayerState
 	{
 		_track = Player.CurrentLoop;
 		_theta = 0f;
+		Sfx.Play(Player, "loop", -6f);
 		_speed = Mathf.Max(Player.HorizontalSpeed, Stats.LoopMinSpeed);
 	}
 

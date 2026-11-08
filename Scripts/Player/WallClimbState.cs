@@ -13,6 +13,7 @@ public partial class WallClimbState : PlayerState
 	public override void Enter()
 	{
 		Player.ResetAirActions();
+		Sfx.Play(Player, "wall", -6f);
 		_stamina = Stats.WallClimbTime;
 		_n = Player.WallNormal;
 		Player.Velocity = Vector3.Zero;

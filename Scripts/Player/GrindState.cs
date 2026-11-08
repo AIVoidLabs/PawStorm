@@ -20,7 +20,10 @@ public partial class GrindState : PlayerState
 		float along = Player.Velocity.Dot(tangent);
 		_dir = along >= 0f ? 1f : -1f;
 		_speed = Mathf.Max(Mathf.Abs(along), Stats.GrindMinSpeed);
+		Player.SetGrindSound(true);
 	}
+
+	public override void Exit() => Player.SetGrindSound(false);
 
 	public override void Physics(float dt)
 	{

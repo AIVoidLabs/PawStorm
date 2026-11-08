@@ -88,6 +88,8 @@ public partial class DrKennel : Area3D, IPounceable
 	{
 		_phase = p;
 		_t = 0f;
+		if (p == Phase.Telegraph) Sfx.Play(this, "boss_warn", -4f);
+		else if (p == Phase.Stunned) Sfx.Play(this, "boss_stun", -4f);
 		_anim.Play(p switch
 		{
 			Phase.Telegraph or Phase.Charge => "Charge",

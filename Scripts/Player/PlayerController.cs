@@ -51,12 +51,14 @@ public partial class PlayerController : CharacterBody3D
 	public override void _PhysicsProcess(double delta)
 	{
 		float dt = (float)delta;
+		_prevVelY = Velocity.Y;
 		_grindCooldown -= dt;
 		UpdateInvulnerability(dt);
 		_jumpBuffer = Input.IsActionJustPressed("jump") ? JumpBufferTime : Mathf.Max(0f, _jumpBuffer - dt);
 		InputDir = ReadCameraRelativeInput();
 		Machine.Physics(dt);
 		UpdateVisual(dt);
+		UpdateFootsteps(dt);
 		UpdatePounceIndicator();
 		if (GlobalPosition.Y < KillHeight) Die();
 	}
@@ -300,7 +302,28 @@ public partial class PlayerController : CharacterBody3D
 	public bool JumpPressed() => _jumpBuffer > 0f;
 	public void ConsumeJump() => _jumpBuffer = 0f;
 
-	public void Land() { ResetAirActions(); LandTransition(); }
+	private float _prevVelY, _stepDistance;
+	private AudioStreamPlayer _grindSfx, _chargeSfx;
+
+	private void UpdateFootsteps(float dt)
+	{
+		if (Machine.CurrentId != PlayerStateId.Run || !IsOnFloor()) { _stepDistance = 0f; return; }
+		_stepDistance += HorizontalSpeed * dt;
+		if (_stepDistance < 2.2f) return;
+		_stepDistance = 0f;
+		Sfx.Play(this, "step", -13f, 0.12f);
+	}
+
+	/// <summary>Looping state sounds (rail grinding, spin charge); they stop when the state exits.</summary>
+	public void SetGrindSound(bool on) => Sfx.SetLoop(this, ref _grindSfx, "grind_loop", on, -9f);
+	public void SetChargeSound(bool on) => Sfx.SetLoop(this, ref _chargeSfx, "charge_loop", on, -8f);
+
+	public void Land()
+	{
+		if (_prevVelY < -9f) Sfx.Play(this, "land", -8f, 0.08f);
+		ResetAirActions();
+		LandTransition();
+	}
 
 	private void LandTransition() => Machine.Transition(InputDir.LengthSquared() > 0.01f || HorizontalSpeed > 0.5f
 		? PlayerStateId.Run : PlayerStateId.Idle);
