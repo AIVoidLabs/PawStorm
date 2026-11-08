@@ -24,7 +24,7 @@ public static class Sfx
 		return s;
 	}
 
-	public static void Play(Node context, string name, float volumeDb = 0f, float pitchJitter = 0f)
+	public static void Play(Node context, string name, float volumeDb = 0f, float pitchJitter = 0f, float pitch = 1f)
 	{
 		if (context == null || !context.IsInsideTree()) return;
 		AudioSettings.Init();
@@ -33,7 +33,7 @@ public static class Sfx
 		var player = new AudioStreamPlayer
 		{
 			Stream = stream, VolumeDb = volumeDb, Bus = AudioSettings.SfxBus, ProcessMode = Node.ProcessModeEnum.Always,
-			PitchScale = 1f + (pitchJitter > 0f ? (GD.Randf() * 2f - 1f) * pitchJitter : 0f),
+			PitchScale = pitch + (pitchJitter > 0f ? (GD.Randf() * 2f - 1f) * pitchJitter : 0f),
 		};
 		player.Finished += player.QueueFree;
 		var root = context.GetTree().Root;

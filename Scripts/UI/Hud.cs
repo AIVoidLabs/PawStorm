@@ -12,6 +12,7 @@ public partial class Hud : CanvasLayer
 	[Export] public Label MessageLabel { get; set; }
 
 	private PlayerController _player;
+	private ChargeBar _chargeBar;
 
 	public override void _Ready()
 	{
@@ -21,6 +22,14 @@ public partial class Hud : CanvasLayer
 		_player = GetTree().GetFirstNodeInGroup("player") as PlayerController;
 		MessageLabel.Visible = false;
 		AddChild(new PauseMenu());
+
+		_chargeBar = new ChargeBar { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+		_chargeBar.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.CenterBottom);
+		_chargeBar.OffsetLeft = -190;
+		_chargeBar.OffsetRight = 190;
+		_chargeBar.OffsetTop = -170;
+		_chargeBar.OffsetBottom = -70;
+		AddChild(_chargeBar);
 		OnStateChanged(null, EventArgs.Empty);
 	}
 
@@ -53,6 +62,7 @@ public partial class Hud : CanvasLayer
 
 	public override void _Process(double delta)
 	{
+		if (_player != null) _chargeBar.Ratio = _player.ChargeRatio;
 		TimeLabel.Text = FormatTime(GameState.LevelTime);
 		if (GameState.BossMaxHp > 0)
 			TimeLabel.Text += $"\nDr. Kennel: {new string('♥', Mathf.Max(GameState.BossHp, 0))}";

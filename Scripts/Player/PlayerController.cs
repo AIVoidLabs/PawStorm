@@ -11,6 +11,8 @@ public partial class PlayerController : CharacterBody3D
 	public StateMachine Machine { get; } = new();
 	public Vector3 InputDir { get; private set; }
 	public Vector3 ExternalAccel { get; set; }
+	/// <summary>Pati Sprint charge 0..1 while charging (0 otherwise); read by the HUD bar.</summary>
+	public float ChargeRatio { get; set; }
 
 	public Node3D PounceTargetNode { get; private set; }
 	public GrindRail CurrentRail { get; private set; }
