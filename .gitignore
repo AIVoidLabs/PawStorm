@@ -30,3 +30,7 @@ obj/
 .vs/
 *.user
 
+
+# Exports
+build/
+
