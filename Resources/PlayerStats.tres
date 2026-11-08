@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-MaxSpeed = 24
-Acceleration = 9
+MaxSpeed = 18
+Acceleration = 6
 OverspeedFriction = 8
 Deceleration = 30
 Friction = 10
@@ -43,7 +43,7 @@ WallClimbSpeed = 6
 WallClimbTime = 2.5
 WallSlideSpeed = 3
 WallJumpPush = 9
-LoopMinSpeed = 20
+LoopMinSpeed = 15
 HurtKnockback = 9
 HurtUpSpeed = 8
 HurtMinTime = 0.4

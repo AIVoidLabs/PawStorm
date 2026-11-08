@@ -6,8 +6,8 @@ namespace PawStorm;
 public partial class PlayerStats : Resource
 {
 	[ExportGroup("Run")]
-	[Export] public float MaxSpeed { get; set; } = 24f;
-	[Export] public float Acceleration { get; set; } = 9f;
+	[Export] public float MaxSpeed { get; set; } = 18f;
+	[Export] public float Acceleration { get; set; } = 6f;
 	[Export] public float OverspeedFriction { get; set; } = 8f;
 	[Export] public float Deceleration { get; set; } = 30f;
 	[Export] public float Friction { get; set; } = 10f;
@@ -59,7 +59,7 @@ public partial class PlayerStats : Resource
 	[Export] public float WallClimbTime { get; set; } = 2.5f;
 	[Export] public float WallSlideSpeed { get; set; } = 3f;
 	[Export] public float WallJumpPush { get; set; } = 9f;
-	[Export] public float LoopMinSpeed { get; set; } = 20f;
+	[Export] public float LoopMinSpeed { get; set; } = 15f;
 
 	[ExportGroup("Damage")]
 	[Export] public float HurtKnockback { get; set; } = 9f;
