@@ -59,7 +59,7 @@ public partial class PlayerStats : Resource
 	[Export] public float WallClimbTime { get; set; } = 2.5f;
 	[Export] public float WallSlideSpeed { get; set; } = 3f;
 	[Export] public float WallJumpPush { get; set; } = 9f;
-	[Export] public float LoopMinSpeed { get; set; } = 15f;
+	[Export] public float LoopMinSpeed { get; set; } = 12f;
 
 	[ExportGroup("Damage")]
 	[Export] public float HurtKnockback { get; set; } = 9f;
