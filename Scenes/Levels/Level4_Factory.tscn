@@ -905,6 +905,12 @@ script = ExtResource("e6")
 Piece = ExtResource("e5")
 Length = 90
 
+[node name="B7" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14.5, 0, -260)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 29
+
 [node name="Dresser" type="Node" parent="."]
 script = ExtResource("e9")
 GroundTile = ExtResource("e7")
@@ -913,7 +919,7 @@ RampTile = ExtResource("e8")
 [node name="ConveyorBoost" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -25)
 script = ExtResource("5")
-Acceleration = Vector3(0, 0, -14)
+Acceleration = Vector3(0, 0, -8)
 
 [node name="Shape" type="CollisionShape3D" parent="ConveyorBoost"]
 shape = SubResource("wind_1")
@@ -921,7 +927,7 @@ shape = SubResource("wind_1")
 [node name="ConveyorBack" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -115)
 script = ExtResource("5")
-Acceleration = Vector3(0, 0, 11)
+Acceleration = Vector3(0, 0, 3)
 
 [node name="Shape" type="CollisionShape3D" parent="ConveyorBack"]
 shape = SubResource("wind_2")

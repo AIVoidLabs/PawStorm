@@ -737,6 +737,12 @@ script = ExtResource("e5")
 Piece = ExtResource("e4")
 Length = 120
 
+[node name="B5" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14.5, 0, -260)
+script = ExtResource("e5")
+Piece = ExtResource("e4")
+Length = 29
+
 [node name="Dresser" type="Node" parent="."]
 script = ExtResource("e8")
 GroundTile = ExtResource("e6")

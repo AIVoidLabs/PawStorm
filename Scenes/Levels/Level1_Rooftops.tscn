@@ -183,7 +183,7 @@ material = SubResource("ramp")
 [node name="WindZone" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -148)
 script = ExtResource("5")
-Acceleration = Vector3(10, 0, 0)
+Acceleration = Vector3(4, 0, 0)
 
 [node name="Shape" type="CollisionShape3D" parent="WindZone"]
 shape = SubResource("wind_shape")
@@ -473,6 +473,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0, -156)
 script = ExtResource("t_barrier")
 Piece = ExtResource("t_rail")
 Length = 70
+
+[node name="B5" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 15, 0, -225.7)
+script = ExtResource("t_barrier")
+Piece = ExtResource("t_rail")
+Length = 30
 
 [node name="Decor" type="Node3D" parent="."]
 

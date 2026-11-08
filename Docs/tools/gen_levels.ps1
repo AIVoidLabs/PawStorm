@@ -275,7 +275,7 @@ New-Level @{
 		Wall 'Container' -9 -100 8 6 8
 	}
 	Theme = @{ Ground = 'TileDock'; Ramp = 'RampDock' }; Water = $true
-	Barriers = { Barrier 'RailDock' 11.5 10 -60; Barrier 'RailDock' -11.5 10 -60; Barrier 'RailDock' 11.5 -74 -150; Barrier 'RailDock' -11.5 -74 -150; Barrier 'RailDock' 11.5 -166 -240; Barrier 'RailDock' -11.5 -166 -240 }
+	Barriers = { Barrier 'RailDock' 11.5 10 -60; Barrier 'RailDock' -11.5 10 -60; Barrier 'RailDock' 11.5 -74 -150; Barrier 'RailDock' -11.5 -74 -150; Barrier 'RailDock' 11.5 -166 -240; Barrier 'RailDock' -11.5 -166 -240; BarrierX 'RailDock' -240 11.5 -11.5 }
 	Decor = {
 		$i = 0
 		for ($z = -8; $z -gt -235; $z -= 17) {
@@ -317,7 +317,7 @@ New-Level @{
 		Plat 'LogStep2' 0 2 -176 6 3 'accent' 1
 	}
 	Theme = @{ Ground = 'TileGrass'; Ramp = 'RampForest' }
-	Barriers = { Barrier 'RailForest' 14.5 10 -100; Barrier 'RailForest' -14.5 10 -100; Barrier 'RailForest' 14.5 -140 -260; Barrier 'RailForest' -14.5 -140 -260 }
+	Barriers = { Barrier 'RailForest' 14.5 10 -100; Barrier 'RailForest' -14.5 10 -100; Barrier 'RailForest' 14.5 -140 -260; Barrier 'RailForest' -14.5 -140 -260; BarrierX 'RailForest' -260 14.5 -14.5 }
 	Decor = {
 		$i = 0
 		for ($z = 4; $z -gt -245; $z -= 13) {
@@ -353,7 +353,7 @@ New-Level @{
 		Slope 'Ramp1' 0 0 -50 12 8 12
 	}
 	Theme = @{ Ground = 'TileFactory'; Ramp = 'RampFactory' }
-	Barriers = { Barrier 'RailFactory' 14.5 10 -60; Barrier 'RailFactory' -14.5 10 -60; Barrier 'RailFactory' 14.5 -80 -150; Barrier 'RailFactory' -14.5 -80 -150; Barrier 'RailFactory' 14.5 -170 -260; Barrier 'RailFactory' -14.5 -170 -260 }
+	Barriers = { Barrier 'RailFactory' 14.5 10 -60; Barrier 'RailFactory' -14.5 10 -60; Barrier 'RailFactory' 14.5 -80 -150; Barrier 'RailFactory' -14.5 -80 -150; Barrier 'RailFactory' 14.5 -170 -260; Barrier 'RailFactory' -14.5 -170 -260; BarrierX 'RailFactory' -260 14.5 -14.5 }
 	Decor = {
 		$i = 0
 		for ($z = -5; $z -gt -250; $z -= 20) {
@@ -367,8 +367,8 @@ New-Level @{
 	Rails = { Rail 'RailPit1' @(@(0, 2.2, -56), @(0, 2.0, -70), @(0, 1.2, -86)); Rail 'RailPit2' @(@(0, 2.2, -146), @(0, 2.0, -160), @(0, 1.2, -176)) }
 	Targets = { Target 0 5 -72; Target 0 5 -158 }
 	Extra = {
-		Wind 'ConveyorBoost' 0 1 -25 28 4 30 0 0 -14
-		Wind 'ConveyorBack' 0 1 -115 28 4 30 0 0 11
+		Wind 'ConveyorBoost' 0 1 -25 28 4 30 0 0 -8
+		Wind 'ConveyorBack' 0 1 -115 28 4 30 0 0 3
 		Mover 'Lift1' 0 -0.3 -70 7 0 0 0.25
 		Mover 'Lift2' 0 -0.3 -160 0 0 5 0.25
 		Loop 'Loop' -9 -35
@@ -390,7 +390,7 @@ New-Level @{
 		Plat 'Island5' 0 0 -240 24 40
 	}
 	Theme = @{ Ground = 'TileCloud'; Ramp = 'RampSky' }
-	Barriers = { Barrier 'RailSky' 9.5 10 -30; Barrier 'RailSky' -9.5 10 -30; Barrier 'RailSky' 7.5 -70 -110; Barrier 'RailSky' -7.5 -70 -110; Barrier 'RailSky' 9.5 -150 -180; Barrier 'RailSky' -9.5 -150 -180; Barrier 'RailSky' 11.5 -220 -260; Barrier 'RailSky' -11.5 -220 -260 }
+	Barriers = { Barrier 'RailSky' 9.5 10 -30; Barrier 'RailSky' -9.5 10 -30; Barrier 'RailSky' 7.5 -70 -110; Barrier 'RailSky' -7.5 -70 -110; Barrier 'RailSky' 9.5 -150 -180; Barrier 'RailSky' -9.5 -150 -180; Barrier 'RailSky' 11.5 -220 -260; Barrier 'RailSky' -11.5 -220 -260; BarrierX 'RailSky' -260 11.5 -11.5 }
 	Decor = {
 		Decor 'FloatRock' 0 0 -2 2.2 0 1.6; Decor 'FloatRock' 0 0 -22 2.2 40 1.5; Decor 'FloatRock' 0 0 -90 1.9 0 1.6
 		Decor 'FloatRock' 0 0 -165 2.1 70 1.6; Decor 'FloatRock' 0 0 -232 2.4 0 1.6; Decor 'FloatRock' 0 0 -250 2.0 120 1.4
@@ -400,7 +400,7 @@ New-Level @{
 	Rails = { Rail 'RailSky' @(@(0, 2.5, -108), @(0, 2.0, -130), @(0, 1.0, -152)) }
 	Targets = { Target 0 4 -42; Target 0 5 -54; Target 0 4 -66 }
 	Extra = {
-		Wind 'GustSide' 0 5 -50 40 20 40 8 0 0
+		Wind 'GustSide' 0 5 -50 40 20 40 4 0 0
 		Wind 'Updraft' 0 10 -130 12 40 30 0 22 0
 		Mover 'Step1' 0 -0.3 -190 0 2 0 0.3
 		Mover 'Step2' 0 -0.3 -204 0 2 0 0.3
