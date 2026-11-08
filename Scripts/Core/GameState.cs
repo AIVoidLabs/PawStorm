@@ -24,6 +24,7 @@ public static class GameState
 	public static void ResetAll()
 	{
 		Fish = 0; Lives = MaxLives; CoreShards = 0;
+		IsGameOver = false;
 		BeginLevel();
 		FishChanged?.Invoke(null, EventArgs.Empty);
 		LivesChanged?.Invoke(null, EventArgs.Empty);
@@ -42,14 +43,32 @@ public static class GameState
 		return lost;
 	}
 
-	/// <summary>Lose one life. Returns true on game over (lives are refilled, fish reset).</summary>
+	public static bool IsGameOver { get; private set; }
+	public static event EventHandler GameOver;
+
+	/// <summary>Lose one life. Returns true when none are left; the player must then pick an option on the Game Over screen.</summary>
 	public static bool LoseLife()
 	{
-		Lives--;
-		bool over = Lives <= 0;
-		if (over) { Lives = MaxLives; Fish = 0; FishChanged?.Invoke(null, EventArgs.Empty); }
+		Lives = Math.Max(0, Lives - 1);
 		LivesChanged?.Invoke(null, EventArgs.Empty);
-		return over;
+		return Lives <= 0;
+	}
+
+	/// <summary>Show the Game Over screen.</summary>
+	public static void RaiseGameOver()
+	{
+		IsGameOver = true;
+		GameOver?.Invoke(null, EventArgs.Empty);
+	}
+
+	/// <summary>Continue after Game Over: lives back to 9, fish lost.</summary>
+	public static void Continue()
+	{
+		IsGameOver = false;
+		Lives = MaxLives;
+		Fish = 0;
+		FishChanged?.Invoke(null, EventArgs.Empty);
+		LivesChanged?.Invoke(null, EventArgs.Empty);
 	}
 
 	/// <param name="grantsShard">False for boss levels (they do not give a Storm Core shard).</param>

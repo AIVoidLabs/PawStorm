@@ -40,6 +40,7 @@ public partial class PauseMenu : CanvasLayer
 
 	public override void _UnhandledInput(InputEvent e)
 	{
+		if (GameState.IsGameOver) return; // the Game Over screen has its own buttons
 		if (e.IsActionPressed("pause")) { SetPaused(!GetTree().Paused); GetViewport().SetInputAsHandled(); }
 	}
 

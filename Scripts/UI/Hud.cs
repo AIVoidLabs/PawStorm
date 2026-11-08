@@ -19,6 +19,7 @@ public partial class Hud : CanvasLayer
 		GameState.FishChanged += OnStateChanged;
 		GameState.LivesChanged += OnStateChanged;
 		GameState.LevelCompleted += OnLevelCompleted;
+		GameState.GameOver += OnGameOver;
 		_player = GetTree().GetFirstNodeInGroup("player") as PlayerController;
 		MessageLabel.Visible = false;
 		AddChild(new PauseMenu());
@@ -38,6 +39,14 @@ public partial class Hud : CanvasLayer
 		GameState.FishChanged -= OnStateChanged;
 		GameState.LivesChanged -= OnStateChanged;
 		GameState.LevelCompleted -= OnLevelCompleted;
+		GameState.GameOver -= OnGameOver;
+	}
+
+	private void OnGameOver(object sender, EventArgs e)
+	{
+		if (_player == null || !IsInsideTree()) return;
+		// the event fires from the player's physics step: build the overlay after it
+		Callable.From(() => GameOverMenu.Show(this, _player)).CallDeferred();
 	}
 
 	private void OnStateChanged(object sender, EventArgs e)

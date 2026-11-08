@@ -102,8 +102,20 @@ public partial class PlayerController : CharacterBody3D
 	/// <summary>Lose a life and return to the last checkpoint (or the level start on game over).</summary>
 	public void Die()
 	{
-		bool gameOver = GameState.LoseLife();
-		if (gameOver) { _spawn = _firstSpawn; GameState.BeginLevel(); }
+		if (GameState.IsGameOver) return;
+		if (GameState.LoseLife())
+		{
+			// No lives left: the Game Over screen pauses the game and lets the player choose how to continue.
+			GameState.RaiseGameOver();
+			return;
+		}
+		_invuln = Stats.InvulnTime;
+		Respawn();
+	}
+
+	/// <summary>Continue from the last checkpoint after Game Over.</summary>
+	public void ReviveAtCheckpoint()
+	{
 		_invuln = Stats.InvulnTime;
 		Respawn();
 	}
