@@ -71,3 +71,6 @@ Pati, Pup (düþman), Dr. Kennel, Balýk, Storm Core, Checkpoint, Sandýk ve Aðaç Bl
 
 ## Animasyon
 Pati (Idle, Run, Jump, Fall, Ball, Charge, Hurt, Grind, Climb), Pup (Walk), Dr. Kennel (Hover, Charge, Stunned) ve Balýk (Swim) Blender'da kemiklendirilip klipleri GLB'ye gömülür (`make_models.py`). Oyunda `ModelAnimator` durumlara göre klip seçer. Katý parçalar tek kemiðe aðýrlýklýdýr (yumuþak deri yok).
+
+## Ortam kiti
+`Docs/tools/blender/make_environment.py` -> `Art/Models/Env/*.glb`: zemin ve rampa karolarý, kenar korkuluklarý, dekor (bina, vinç, fener, kaya, boru, gaz bacasý, bulut...). `LevelDresser` CSG zeminlerini (metadata `skin`) karo MultiMesh'iyle kaplar, `BarrierLine` iki kenara korkuluk + görünmez çarpýþma duvarý koyar (layer 2; oyuncu maskesi 3, kamera kolu çarpmaz). Bölüm 2-6 `gen_levels.ps1` ile üretilir.

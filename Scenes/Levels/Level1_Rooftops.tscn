@@ -15,6 +15,16 @@
 [ext_resource type="PackedScene" path="res://Scenes/Props/Checkpoint.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
 [ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/TileRoof.glb" id="t_ground"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RampRoof.glb" id="t_ramp"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RailRoof.glb" id="t_rail"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Building.glb" id="t_building"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Chimney.glb" id="t_chimney"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/ACUnit.glb" id="t_ac"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/WaterTower.glb" id="t_tower"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelDresser.cs" id="t_dresser"]
+[ext_resource type="Script" path="res://Scripts/Core/BarrierLine.cs" id="t_barrier"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="t_toon"]
 [sub_resource type="BoxShape3D" id="loop_trigger"]
 size = Vector3(4, 3, 2)
 
@@ -100,30 +110,35 @@ current = true
 [node name="Geometry" type="Node3D" parent="."]
 
 [node name="Roof1" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -65)
 use_collision = true
 size = Vector3(30, 1, 150)
 material = SubResource("roof")
 
 [node name="Roof2" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -191)
 use_collision = true
 size = Vector3(30, 1, 70)
 material = SubResource("roof")
 
 [node name="RampJump" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ramp"
 transform = Transform3D(1, 0, 0, 0, 0.9659, -0.2588, 0, 0.2588, 0.9659, 0, 1.3, -30)
 use_collision = true
 size = Vector3(8, 1, 20)
 material = SubResource("ramp")
 
 [node name="HillUp" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ramp"
 transform = Transform3D(1, 0, 0, 0, 0.9848, -0.1736, 0, 0.1736, 0.9848, 0, 1.75, -60)
 use_collision = true
 size = Vector3(14, 1, 20)
 material = SubResource("ramp")
 
 [node name="HillDown" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ramp"
 transform = Transform3D(1, 0, 0, 0, 0.9848, 0.1736, 0, -0.1736, 0.9848, 0, 1.75, -80)
 use_collision = true
 size = Vector3(14, 1, 20)
@@ -427,3 +442,160 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -160)
 
 [node name="StormCore" parent="." instance=ExtResource("12")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -218)
+
+[node name="Dresser" type="Node" parent="."]
+script = ExtResource("t_dresser")
+GroundTile = ExtResource("t_ground")
+RampTile = ExtResource("t_ramp")
+
+[node name="Barriers" type="Node3D" parent="."]
+
+[node name="B1" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 0, 10)
+script = ExtResource("t_barrier")
+Piece = ExtResource("t_rail")
+Length = 150
+
+[node name="B2" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0, 10)
+script = ExtResource("t_barrier")
+Piece = ExtResource("t_rail")
+Length = 150
+
+[node name="B3" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 0, -156)
+script = ExtResource("t_barrier")
+Piece = ExtResource("t_rail")
+Length = 70
+
+[node name="B4" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0, -156)
+script = ExtResource("t_barrier")
+Piece = ExtResource("t_rail")
+Length = 70
+
+[node name="Decor" type="Node3D" parent="."]
+
+[node name="Bld0-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, -30, -46, 24)
+script = ExtResource("t_toon")
+
+[node name="Bld01" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 48, -46, 24)
+script = ExtResource("t_toon")
+
+[node name="Bld1-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, -39, -41, -2)
+script = ExtResource("t_toon")
+
+[node name="Bld11" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 30, -41, -2)
+script = ExtResource("t_toon")
+
+[node name="Bld2-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, -48, -36, -28)
+script = ExtResource("t_toon")
+
+[node name="Bld21" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, 39, -36, -28)
+script = ExtResource("t_toon")
+
+[node name="Bld3-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, -30, -31, -54)
+script = ExtResource("t_toon")
+
+[node name="Bld31" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 48, -31, -54)
+script = ExtResource("t_toon")
+
+[node name="Bld4-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, -39, -26, -80)
+script = ExtResource("t_toon")
+
+[node name="Bld41" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 30, -26, -80)
+script = ExtResource("t_toon")
+
+[node name="Bld5-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, -48, -21, -106)
+script = ExtResource("t_toon")
+
+[node name="Bld51" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 39, -21, -106)
+script = ExtResource("t_toon")
+
+[node name="Bld6-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, -30, -46, -132)
+script = ExtResource("t_toon")
+
+[node name="Bld61" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, 48, -46, -132)
+script = ExtResource("t_toon")
+
+[node name="Bld7-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, -39, -41, -158)
+script = ExtResource("t_toon")
+
+[node name="Bld71" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 30, -41, -158)
+script = ExtResource("t_toon")
+
+[node name="Bld8-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, -48, -36, -184)
+script = ExtResource("t_toon")
+
+[node name="Bld81" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 39, -36, -184)
+script = ExtResource("t_toon")
+
+[node name="Bld9-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, -30, -31, -210)
+script = ExtResource("t_toon")
+
+[node name="Bld91" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 48, -31, -210)
+script = ExtResource("t_toon")
+
+[node name="Bld10-1" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, -39, -26, -236)
+script = ExtResource("t_toon")
+
+[node name="Bld101" parent="Decor" instance=ExtResource("t_building")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, 30, -26, -236)
+script = ExtResource("t_toon")
+
+[node name="Prop1" parent="Decor" instance=ExtResource("t_chimney")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -12.5, 0, -20)
+script = ExtResource("t_toon")
+
+[node name="Prop2" parent="Decor" instance=ExtResource("t_chimney")]
+transform = Transform3D(0, 0, -1.2, 0, 1.2, 0, 1.2, 0, 0, 12.5, 0, -70)
+script = ExtResource("t_toon")
+
+[node name="Prop3" parent="Decor" instance=ExtResource("t_chimney")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -12.5, 0, -120)
+script = ExtResource("t_toon")
+
+[node name="Prop4" parent="Decor" instance=ExtResource("t_ac")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0, -40)
+script = ExtResource("t_toon")
+
+[node name="Prop5" parent="Decor" instance=ExtResource("t_ac")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -12, 0, -95)
+script = ExtResource("t_toon")
+
+[node name="Prop6" parent="Decor" instance=ExtResource("t_tower")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -125)
+script = ExtResource("t_toon")
+
+[node name="Prop7" parent="Decor" instance=ExtResource("t_chimney")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -12, 0, -170)
+script = ExtResource("t_toon")
+
+[node name="Prop8" parent="Decor" instance=ExtResource("t_ac")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 12, 0, -200)
+script = ExtResource("t_toon")
+
+[node name="Prop9" parent="Decor" instance=ExtResource("t_tower")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -215)
+script = ExtResource("t_toon")

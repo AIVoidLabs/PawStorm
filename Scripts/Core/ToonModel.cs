@@ -44,6 +44,41 @@ public partial class ToonModel : Node3D
 		}
 	}
 
+	private static readonly Dictionary<string, Mesh> MeshCache = new();
+
+	/// <summary>
+	/// The (single) mesh of a static .glb with toon materials, for MultiMesh use (tiles, barriers).
+	/// No outline: repeated pieces would draw a grid of lines.
+	/// </summary>
+	public static Mesh ToonMesh(PackedScene scene)
+	{
+		if (scene == null) return null;
+		if (MeshCache.TryGetValue(scene.ResourcePath, out var cached)) return cached;
+		var inst = scene.Instantiate<Node3D>();
+		Mesh found = null;
+		foreach (var mi in Meshes(inst)) { found = mi.Mesh; break; }
+		Mesh result = null;
+		if (found != null)
+		{
+			result = (Mesh)found.Duplicate();
+			for (int s = 0; s < result.GetSurfaceCount(); s++)
+			{
+				if (result.SurfaceGetMaterial(s) is not BaseMaterial3D src) continue;
+				if (!ToonCache.TryGetValue(src, out var toon))
+				{
+					var d = (BaseMaterial3D)src.Duplicate();
+					d.DiffuseMode = BaseMaterial3D.DiffuseModeEnum.Toon;
+					d.SpecularMode = BaseMaterial3D.SpecularModeEnum.Disabled;
+					ToonCache[src] = toon = d;
+				}
+				result.SurfaceSetMaterial(s, toon);
+			}
+		}
+		inst.Free();
+		MeshCache[scene.ResourcePath] = result;
+		return result;
+	}
+
 	/// <summary>All mesh instances below <paramref name="root"/> (recursive).</summary>
 	public static IEnumerable<MeshInstance3D> Meshes(Node root)
 	{

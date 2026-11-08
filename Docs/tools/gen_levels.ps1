@@ -8,7 +8,14 @@ function V($a, $b, $c) { "Vector3($(F $a), $(F $b), $(F $c))" }
 function T($x, $y, $z) { "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, $(F $x), $(F $y), $(F $z))" }
 function XF($ang, $x, $y, $z) { $c = [math]::Cos($ang); $s = [math]::Sin($ang); "Transform3D(1, 0, 0, 0, $(F $c), $(F (-$s)), 0, $(F $s), $(F $c), $(F $x), $(F $y), $(F $z))" }
 
+$script:res = [ordered]@{}
+function ResId([string]$path, [string]$type = 'PackedScene') {
+	if (-not $script:res.Contains($path)) { $script:res[$path] = @{ id = "e$($script:res.Count)"; type = $type } }
+	return $script:res[$path].id
+}
+
 function New-Level($def) {
+	$script:res = [ordered]@{}
 	$script:n = New-Object Text.StringBuilder
 	$script:sub = New-Object Text.StringBuilder
 	$script:uid = 0
@@ -17,12 +24,13 @@ function New-Level($def) {
 
 	# ---- node helpers (top surface at $top) ----
 	function Plat($name, [double]$x, [double]$top, [double]$z, [double]$w, [double]$l, $mat = 'ground', [double]$thick = 1) {
-		Add "`n[node name=`"$name`" type=`"CSGBox3D`" parent=`"Geometry`"]`ntransform = $(T $x ($top - $thick / 2) $z)`nuse_collision = true`nsize = $(V $w $thick $l)`nmaterial = SubResource(`"$mat`")"
+		$skin = if ($thick -eq 1) { if ($mat -eq 'ground') { 'ground' } else { 'ramp' } } else { '' }; $meta = if ($skin) { "`nmetadata/skin = `"$skin`"" } else { '' }
+		Add "`n[node name=`"$name`" type=`"CSGBox3D`" parent=`"Geometry`"]$meta`ntransform = $(T $x ($top - $thick / 2) $z)`nuse_collision = true`nsize = $(V $w $thick $l)`nmaterial = SubResource(`"$mat`")"
 	}
 	function Slope($name, [double]$x, [double]$y0, [double]$z0, [double]$len, [double]$w, [double]$deg, $mat = 'accent') {
 		$a = $deg * [math]::PI / 180; $s = [math]::Sin($a); $c = [math]::Cos($a); $t = 1
 		$cy = $y0 + ($len / 2) * $s - ($t / 2) * $c; $cz = $z0 - ($len / 2) * $c - ($t / 2) * $s
-		Add "`n[node name=`"$name`" type=`"CSGBox3D`" parent=`"Geometry`"]`ntransform = $(XF $a $x $cy $cz)`nuse_collision = true`nsize = $(V $w $t $len)`nmaterial = SubResource(`"$mat`")"
+		Add "`n[node name=`"$name`" type=`"CSGBox3D`" parent=`"Geometry`"]`nmetadata/skin = `"ramp`"`ntransform = $(XF $a $x $cy $cz)`nuse_collision = true`nsize = $(V $w $t $len)`nmaterial = SubResource(`"$mat`")"
 	}
 	function Trunk($name, [double]$x, [double]$z, [double]$h, [double]$r = 1.2, $mat = 'accent') {
 		Add "`n[node name=`"$name`" type=`"CSGCylinder3D`" parent=`"Geometry`" groups=[`"climbable`"]]`ntransform = $(T $x ($h / 2) $z)`nuse_collision = true`nradius = $(F $r)`nheight = $(F $h)`nmaterial = SubResource(`"$mat`")"
@@ -54,7 +62,23 @@ function New-Level($def) {
 	$script:tgN = 0
 	function Target([double]$x, [double]$y, [double]$z) { $script:tgN++; Add "`n[node name=`"T$($script:tgN)`" type=`"Node3D`" parent=`"PounceTargets`"]`ntransform = $(T $x $y $z)`nscript = ExtResource(`"8`")`n`n[node name=`"Mesh`" type=`"MeshInstance3D`" parent=`"PounceTargets/T$($script:tgN)`"]`nmesh = SubResource(`"target_mesh`")" }
 	$script:dcN = 0
-	function Decor([string]$kind, [double]$x, [double]$y, [double]$z, [double]$sc = 1, [double]$rotY = 0) { $script:dcN++; $id = if ($kind -eq 'tree') { 20 } else { 21 }; $a = $rotY * [math]::PI / 180; $c = [math]::Cos($a) * $sc; $s = [math]::Sin($a) * $sc; Add "`n[node name=`"D$($script:dcN)`" parent=`"Decor`" instance=ExtResource(`"$id`")]`ntransform = Transform3D($(F $c), 0, $(F (-$s)), 0, $(F $sc), 0, $(F $s), 0, $(F $c), $(F $x), $(F $y), $(F $z))`nscript = ExtResource(`"23`")" }
+	function Decor([string]$kind, [double]$x, [double]$y, [double]$z, [double]$sc = 1, [double]$rotY = 0, [double]$scY = 0) {
+		$script:dcN++; if ($scY -eq 0) { $scY = $sc }
+		$k = $kind.Substring(0, 1).ToUpper() + $kind.Substring(1)
+		$path = if (Test-Path "Art/Models/Env/$k.glb") { "res://Art/Models/Env/$k.glb" } else { "res://Art/Models/$k.glb" }
+		$id = ResId $path
+		$a = $rotY * [math]::PI / 180; $c = [math]::Cos($a) * $sc; $s = [math]::Sin($a) * $sc
+		Add "`n[node name=`"D$($script:dcN)`" parent=`"Decor`" instance=ExtResource(`"$id`")]`ntransform = Transform3D($(F $c), 0, $(F (-$s)), 0, $(F $scY), 0, $(F $s), 0, $(F $c), $(F $x), $(F $y), $(F $z))`nscript = ExtResource(`"23`")"
+	}
+	$script:brN = 0
+	function Barrier([string]$piece, [double]$x, [double]$z0, [double]$z1) {
+		$script:brN++; $pieceId = ResId "res://Art/Models/Env/$piece.glb"; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
+		Add "`n[node name=`"B$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = $(T $x 0 $z0)`nscript = ExtResource(`"$sid`")`nPiece = ExtResource(`"$pieceId`")`nLength = $(F ([math]::Abs($z0 - $z1)))"
+	}
+	function BarrierX([string]$piece, [double]$z, [double]$x0, [double]$x1) {
+		$script:brN++; $pieceId = ResId "res://Art/Models/Env/$piece.glb"; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
+		Add "`n[node name=`"B$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, $(F $x0), 0, $(F $z))`nscript = ExtResource(`"$sid`")`nPiece = ExtResource(`"$pieceId`")`nLength = $(F ([math]::Abs($x0 - $x1)))"
+	}
 	$script:cpN = 0
 	function Check([double]$x, [double]$y, [double]$z) { $script:cpN++; Add "`n[node name=`"CP$($script:cpN)`" parent=`".`" instance=ExtResource(`"11`")]`ntransform = $(T $x $y $z)" }
 
@@ -71,8 +95,17 @@ function New-Level($def) {
 	if ($def.Enemies) { & $def.Enemies }
 	Add "`n[node name=`"Decor`" type=`"Node3D`" parent=`".`"]"
 	if ($def.Decor) { & $def.Decor }
+	Add "`n[node name=`"Barriers`" type=`"Node3D`" parent=`".`"]"
+	if ($def.Barriers) { & $def.Barriers }
+	if ($def.Theme) {
+		$gid = ResId "res://Art/Models/Env/$($def.Theme.Ground).glb"; $rid = ResId "res://Art/Models/Env/$($def.Theme.Ramp).glb"; $did = ResId 'res://Scripts/Core/LevelDresser.cs' 'Script'
+		Add "`n[node name=`"Dresser`" type=`"Node`" parent=`".`"]`nscript = ExtResource(`"$did`")`nGroundTile = ExtResource(`"$gid`")`nRampTile = ExtResource(`"$rid`")"
+	}
+	if ($def.Water) {
+		AddSub "[sub_resource type=`"StandardMaterial3D`" id=`"water_mat`"]`ndiffuse_mode = 3`nspecular_mode = 2`nalbedo_color = Color(0.15, 0.5, 0.75, 1)`n`n[sub_resource type=`"BoxMesh`" id=`"water_mesh`"]`nmaterial = SubResource(`"water_mat`")`nsize = Vector3(600, 0.2, 700)`n"
+		Add "`n[node name=`"Water`" type=`"MeshInstance3D`" parent=`".`"]`ntransform = $(T 0 -6.5 -110)`nmesh = SubResource(`"water_mesh`")"
+	}
 	if ($def.Extra) { & $def.Extra }
-
 	$c = $def.Colors
 	$head = @"
 [gd_scene load_steps=30 format=3]
@@ -219,6 +252,8 @@ LevelTitle = "$($def.Title)"
 "@
 	$tail = ""
 	if ($def.CoreAt) { $tail = "`n[node name=`"StormCore`" parent=`".`" instance=ExtResource(`"12`")]`ntransform = $(T $def.CoreAt[0] $def.CoreAt[1] $def.CoreAt[2])`n" }
+	$extLines = ($script:res.Keys | ForEach-Object { "[ext_resource type=`"$($script:res[$_].type)`" path=`"$_`" id=`"$($script:res[$_].id)`"]" }) -join "`n"
+	$head = $head.Replace('[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]', '[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]' + "`n" + $extLines)
 	$text = $head + $script:sub.ToString() + $body + $script:n.ToString() + $tail
 	[IO.File]::WriteAllText((Join-Path $PWD "Scenes/Levels/$($def.File)"), $text, $utf8)
 	Write-Host "wrote $($def.File) (fish $($script:fishN), enemies $($script:enN))"
@@ -239,7 +274,19 @@ New-Level @{
 		Plat 'Crate4' -4 3 -130 3 3 'accent' 3
 		Wall 'Container' -9 -100 8 6 8
 	}
-	Decor = { $i = 0; for ($z = -8; $z -gt -235; $z -= 17) { $i++; if (($z -lt -58 -and $z -gt -76) -or ($z -lt -148 -and $z -gt -168)) { continue }; Decor 'crate' 11 0 $z 1 ($i * 37); if ($i % 3 -eq 0) { Decor 'crate' 11 1.2 $z 0.9 ($i * 53) }; Decor 'crate' -11 0 ($z - 6) 1.1 ($i * 71) } }
+	Theme = @{ Ground = 'TileDock'; Ramp = 'RampDock' }; Water = $true
+	Barriers = { Barrier 'RailDock' 11.5 10 -60; Barrier 'RailDock' -11.5 10 -60; Barrier 'RailDock' 11.5 -74 -150; Barrier 'RailDock' -11.5 -74 -150; Barrier 'RailDock' 11.5 -166 -240; Barrier 'RailDock' -11.5 -166 -240 }
+	Decor = {
+		$i = 0
+		for ($z = -8; $z -gt -235; $z -= 17) {
+			$i++; if (($z -lt -58 -and $z -gt -76) -or ($z -lt -148 -and $z -gt -168)) { continue }
+			Decor 'crate' 9.6 0 $z 1 ($i * 37); if ($i % 3 -eq 0) { Decor 'crate' 9.6 1.2 $z 0.9 ($i * 53) }
+			Decor 'barrel' -9.6 0 ($z - 4) 1 0; Decor 'barrel' -8.6 0 ($z - 5) 1 0
+		}
+		Decor 'Crane' -22 -6.5 -40 1.3 0 1.3; Decor 'Crane' 24 -6.5 -120 1.3 180 1.3; Decor 'Crane' -24 -6.5 -200 1.3 0 1.3
+		Decor 'Lighthouse' 38 -6.5 -150 1.6 0 1.6
+		Decor 'Boat' 20 -5.6 -30 1 20; Decor 'Boat' -20 -5.6 -100 1 -30; Decor 'Boat' 22 -5.6 -190 1 10; Decor 'Boat' -18 -5.6 -150 1 70
+	}
 	Rails = { Rail 'RailGap' @(@(0, 2.0, -146), @(0, 1.6, -158), @(0, 1.0, -170)) }
 	Targets = { Target 0 5 -80; Target 3 5 -100; Target 0 4 -158 }
 	Extra = {
@@ -256,6 +303,8 @@ New-Level @{
 	File = 'Level3_Forest.tscn'; NodeName = 'Forest'; Title = 'Orman'; Start = @(0, 1, 5); CoreAt = @(0, 1.8, -242)
 	Colors = @{ Ground = 'Color(0.3, 0.65, 0.28, 1)'; Accent = 'Color(0.5, 0.33, 0.2, 1)'; Platform = 'Color(0.4, 0.75, 0.35, 1)'; SkyTop = 'Color(0.3, 0.65, 0.95, 1)'; SkyHorizon = 'Color(0.8, 0.95, 0.85, 1)' }
 	Geometry = {
+		Plat 'BankL' -26 -1.5 -125 22 270
+		Plat 'BankR' 26 -1.5 -125 22 270
 		Plat 'GroundA' 0 0 -45 30 110
 		Plat 'GroundB' 0 0 -200 30 120
 		Slope 'Hill1Up' 0 0 -15 24 14 12
@@ -267,7 +316,19 @@ New-Level @{
 		Plat 'LogStep1' 0 1 -170 6 3 'accent' 1
 		Plat 'LogStep2' 0 2 -176 6 3 'accent' 1
 	}
-	Decor = { $i = 0; for ($z = 4; $z -gt -245; $z -= 13) { $i++; $sc = 1.3 + (($i * 7) % 5) * 0.15; Decor 'tree' 19 0 $z $sc ($i * 40); Decor 'tree' -19 0 ($z - 6) ($sc + 0.2) ($i * 25) } }
+	Theme = @{ Ground = 'TileGrass'; Ramp = 'RampForest' }
+	Barriers = { Barrier 'RailForest' 14.5 10 -100; Barrier 'RailForest' -14.5 10 -100; Barrier 'RailForest' 14.5 -140 -260; Barrier 'RailForest' -14.5 -140 -260 }
+	Decor = {
+		$i = 0
+		for ($z = 4; $z -gt -245; $z -= 13) {
+			$i++; $sc = 1.3 + (($i * 7) % 5) * 0.15
+			Decor 'tree' 19 -1.5 $z $sc ($i * 40); Decor 'tree' -19 -1.5 ($z - 6) ($sc + 0.2) ($i * 25)
+			if ($i % 2 -eq 0) { Decor 'bush' 17 -1.5 ($z - 3) 1.2 ($i * 50) }
+			if ($i % 3 -eq 0) { Decor 'rock' -17 -1.5 ($z - 9) 1.4 ($i * 30) }
+			if ($i % 4 -eq 1) { Decor 'mushroom' 12.5 0 ($z - 5) 1.6 0; Decor 'mushroom' -12.8 0 ($z - 2) 1.3 0 }
+			if ($i % 5 -eq 2) { Decor 'bush' -12.5 0 ($z - 7) 0.9 ($i * 11) }
+		}
+	}
 	Rails = { Rail 'RailRavine' @(@(0, 3.5, -102), @(0, 3.2, -120), @(0, 2.4, -138)) }
 	Targets = { Target 0 4 -105; Target 0 5 -118; Target -2 4 -130 }
 	Extra = {
@@ -291,7 +352,18 @@ New-Level @{
 		Wall 'Shaft' 11 -125 12 6 8
 		Slope 'Ramp1' 0 0 -50 12 8 12
 	}
-	Decor = { $i = 0; for ($z = -5; $z -gt -250; $z -= 20) { $i++; if (($z -lt -55 -and $z -gt -85) -or ($z -lt -145 -and $z -gt -178)) { continue }; Decor 'crate' 13.5 0 $z 1.2 ($i * 37); Decor 'crate' -13.5 0 ($z - 8) 1.1 ($i * 61) } }
+	Theme = @{ Ground = 'TileFactory'; Ramp = 'RampFactory' }
+	Barriers = { Barrier 'RailFactory' 14.5 10 -60; Barrier 'RailFactory' -14.5 10 -60; Barrier 'RailFactory' 14.5 -80 -150; Barrier 'RailFactory' -14.5 -80 -150; Barrier 'RailFactory' 14.5 -170 -260; Barrier 'RailFactory' -14.5 -170 -260 }
+	Decor = {
+		$i = 0
+		for ($z = -5; $z -gt -250; $z -= 20) {
+			$i++; if (($z -lt -55 -and $z -gt -85) -or ($z -lt -145 -and $z -gt -178)) { continue }
+			Decor 'crate' 12.6 0 $z 1.2 ($i * 37); Decor 'crate' -12.6 0 ($z - 8) 1.1 ($i * 61)
+		}
+		for ($z = 0; $z -gt -260; $z -= 8) { Decor 'Pipe' 17.5 3 $z 1 90; Decor 'Pipe' -17.5 4.5 ($z - 4) 1 90 }
+		for ($z = -10; $z -gt -260; $z -= 45) { Decor 'SmokeStack' 32 -30 $z 1.5 0 2.5; Decor 'SmokeStack' -32 -30 ($z - 20) 1.5 0 2.4 }
+		for ($z = -30; $z -gt -260; $z -= 55) { Decor 'Gear' 24 2 $z 2 90; Decor 'Gear' -24 5 ($z - 25) 2.4 90; Decor 'Tank' -28 -10 ($z + 10) 2.2 0 }
+	}
 	Rails = { Rail 'RailPit1' @(@(0, 2.2, -56), @(0, 2.0, -70), @(0, 1.2, -86)); Rail 'RailPit2' @(@(0, 2.2, -146), @(0, 2.0, -160), @(0, 1.2, -176)) }
 	Targets = { Target 0 5 -72; Target 0 5 -158 }
 	Extra = {
@@ -317,6 +389,14 @@ New-Level @{
 		Wall 'Cliff' 6 -165 12 6 8
 		Plat 'Island5' 0 0 -240 24 40
 	}
+	Theme = @{ Ground = 'TileCloud'; Ramp = 'RampSky' }
+	Barriers = { Barrier 'RailSky' 9.5 10 -30; Barrier 'RailSky' -9.5 10 -30; Barrier 'RailSky' 7.5 -70 -110; Barrier 'RailSky' -7.5 -70 -110; Barrier 'RailSky' 9.5 -150 -180; Barrier 'RailSky' -9.5 -150 -180; Barrier 'RailSky' 11.5 -220 -260; Barrier 'RailSky' -11.5 -220 -260 }
+	Decor = {
+		Decor 'FloatRock' 0 0 -2 2.2 0 1.6; Decor 'FloatRock' 0 0 -22 2.2 40 1.5; Decor 'FloatRock' 0 0 -90 1.9 0 1.6
+		Decor 'FloatRock' 0 0 -165 2.1 70 1.6; Decor 'FloatRock' 0 0 -232 2.4 0 1.6; Decor 'FloatRock' 0 0 -250 2.0 120 1.4
+		$i = 0
+		for ($z = 20; $z -gt -270; $z -= 18) { $i++; $sx = if ($i % 2) { 1 } else { -1 }; Decor 'Cloud' ($sx * (18 + ($i * 7) % 20)) (-8 - ($i * 5) % 22) $z (1.2 + (($i * 3) % 4) * 0.4) ($i * 40) }
+	}
 	Rails = { Rail 'RailSky' @(@(0, 2.5, -108), @(0, 2.0, -130), @(0, 1.0, -152)) }
 	Targets = { Target 0 4 -42; Target 0 5 -54; Target 0 4 -66 }
 	Extra = {
@@ -336,6 +416,13 @@ New-Level @{
 	File = 'Level6_Boss.tscn'; NodeName = 'BossArena'; Title = 'Dr. Kennel'; Start = @(0, 1, 22); CoreAt = $null
 	Colors = @{ Ground = 'Color(0.5, 0.5, 0.58, 1)'; Accent = 'Color(0.8, 0.2, 0.3, 1)'; Platform = 'Color(0.8, 0.8, 0.85, 1)'; SkyTop = 'Color(0.2, 0.15, 0.35, 1)'; SkyHorizon = 'Color(0.6, 0.4, 0.6, 1)' }
 	Geometry = { Plat 'Arena' 0 0 0 60 60; Plat 'Pillar1' -22 4 -22 3 3 'accent' 8; Plat 'Pillar2' 22 4 -22 3 3 'accent' 8 }
+	Theme = @{ Ground = 'TileFactory'; Ramp = 'RampFactory' }
+	Barriers = { Barrier 'RailFactory' 29.5 30 -30; Barrier 'RailFactory' -29.5 30 -30; BarrierX 'RailFactory' 29.5 30 -30; BarrierX 'RailFactory' -29.5 30 -30 }
+	Decor = {
+		Decor 'Gear' 36 4 -10 2.4 90; Decor 'Gear' -36 4 10 2.4 90; Decor 'Gear' 36 4 20 2 90
+		Decor 'SmokeStack' 40 -25 -35 1.6 0 2.4; Decor 'SmokeStack' -40 -25 -35 1.6 0 2.4; Decor 'Tank' -38 -8 -10 2.4 0; Decor 'Tank' 38 -8 15 2.2 0
+		Decor 'Pipe' 33 2 0 1 90; Decor 'Pipe' -33 2 -8 1 90
+	}
 	Fish = { for ($i = 0; $i -lt 12; $i++) { $a = 6.2832 * $i / 12; FishAt ([math]::Cos($a) * 18) 1.2 ([math]::Sin($a) * 18) } }
 	Extra = {
 		Add @"

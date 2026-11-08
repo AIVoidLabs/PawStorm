@@ -10,6 +10,7 @@ radius = 0.4
 height = 1.2
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Visual")]
+collision_mask = 3
 script = ExtResource("1")
 Stats = ExtResource("2")
 Visual = NodePath("Visual")

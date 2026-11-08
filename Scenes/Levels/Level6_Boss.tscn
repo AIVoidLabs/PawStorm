@@ -19,6 +19,15 @@
 [ext_resource type="PackedScene" path="res://Art/Models/Crate.glb" id="21"]
 [ext_resource type="PackedScene" path="res://Art/Models/DrKennel.glb" id="22"]
 [ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Gear.glb" id="e0"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/SmokeStack.glb" id="e1"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Tank.glb" id="e2"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Pipe.glb" id="e3"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RailFactory.glb" id="e4"]
+[ext_resource type="Script" path="res://Scripts/Core/BarrierLine.cs" id="e5"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/TileFactory.glb" id="e6"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RampFactory.glb" id="e7"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelDresser.cs" id="e8"]
 
 [sub_resource type="StandardMaterial3D" id="ground"]
 diffuse_mode = 3
@@ -139,6 +148,7 @@ LevelTitle = "Dr. Kennel"
 [node name="Geometry" type="Node3D" parent="."]
 
 [node name="Arena" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
 size = Vector3(60, 1, 60)
@@ -201,6 +211,73 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5886, 1.2, -8.9998)
 [node name="Enemies" type="Node3D" parent="."]
 
 [node name="Decor" type="Node3D" parent="."]
+
+[node name="D1" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0, 0, -2.4, 0, 2.4, 0, 2.4, 0, 0, 36, 4, -10)
+script = ExtResource("23")
+
+[node name="D2" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0, 0, -2.4, 0, 2.4, 0, 2.4, 0, 0, -36, 4, 10)
+script = ExtResource("23")
+
+[node name="D3" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0, 0, -2, 0, 2, 0, 2, 0, 0, 36, 4, 20)
+script = ExtResource("23")
+
+[node name="D4" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.6, 0, 0, 0, 2.4, 0, 0, 0, 1.6, 40, -25, -35)
+script = ExtResource("23")
+
+[node name="D5" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.6, 0, 0, 0, 2.4, 0, 0, 0, 1.6, -40, -25, -35)
+script = ExtResource("23")
+
+[node name="D6" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, -38, -8, -10)
+script = ExtResource("23")
+
+[node name="D7" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 38, -8, 15)
+script = ExtResource("23")
+
+[node name="D8" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 33, 2, 0)
+script = ExtResource("23")
+
+[node name="D9" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -33, 2, -8)
+script = ExtResource("23")
+
+[node name="Barriers" type="Node3D" parent="."]
+
+[node name="B1" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.5, 0, 30)
+script = ExtResource("e5")
+Piece = ExtResource("e4")
+Length = 60
+
+[node name="B2" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.5, 0, 30)
+script = ExtResource("e5")
+Piece = ExtResource("e4")
+Length = 60
+
+[node name="B3" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 30, 0, 29.5)
+script = ExtResource("e5")
+Piece = ExtResource("e4")
+Length = 60
+
+[node name="B4" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 30, 0, -29.5)
+script = ExtResource("e5")
+Piece = ExtResource("e4")
+Length = 60
+
+[node name="Dresser" type="Node" parent="."]
+script = ExtResource("e8")
+GroundTile = ExtResource("e6")
+RampTile = ExtResource("e7")
 
 [node name="Boss" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -8)
