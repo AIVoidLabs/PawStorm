@@ -1,0 +1,884 @@
+[gd_scene load_steps=30 format=3]
+
+[ext_resource type="Material" path="res://Art/Materials/Outline.tres" id="outline"]
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Fish.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Hud.tscn" id="3"]
+[ext_resource type="Script" path="res://Scripts/Camera/FollowCamera.cs" id="4"]
+[ext_resource type="Script" path="res://Scripts/Core/WindZone.cs" id="5"]
+[ext_resource type="Script" path="res://Scripts/Core/FloatingProp.cs" id="6"]
+[ext_resource type="Script" path="res://Scripts/Core/GrindRail.cs" id="7"]
+[ext_resource type="Script" path="res://Scripts/Enemies/PounceTarget.cs" id="8"]
+[ext_resource type="Script" path="res://Scripts/Core/LoopTrack.cs" id="9"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Enemy.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Checkpoint.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
+[ext_resource type="Script" path="res://Scripts/Enemies/DrKennel.cs" id="14"]
+[ext_resource type="PackedScene" path="res://Art/Models/Tree.glb" id="20"]
+[ext_resource type="PackedScene" path="res://Art/Models/Crate.glb" id="21"]
+[ext_resource type="PackedScene" path="res://Art/Models/DrKennel.glb" id="22"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/TemplePillar.glb" id="e0"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Brazier.glb" id="e1"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/CatStatue.glb" id="e2"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Arch.glb" id="e3"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Cloud.glb" id="e4"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RailTemple.glb" id="e5"]
+[ext_resource type="Script" path="res://Scripts/Core/BarrierLine.cs" id="e6"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/TileTemple.glb" id="e7"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RampTemple.glb" id="e8"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelDresser.cs" id="e9"]
+
+[sub_resource type="StandardMaterial3D" id="ground"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.68, 0.56, 0.38, 1)
+
+[sub_resource type="StandardMaterial3D" id="accent"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.55, 0.42, 0.28, 1)
+
+[sub_resource type="StandardMaterial3D" id="plat_mat"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.95, 0.8, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="target_mat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(1, 0.2, 0.2, 1)
+emission_enabled = true
+emission = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="target_mesh"]
+material = SubResource("target_mat")
+radius = 0.5
+height = 1.0
+
+[sub_resource type="BoxShape3D" id="plat_shape"]
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxMesh" id="plat_mesh"]
+material = SubResource("plat_mat")
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxShape3D" id="loop_trigger"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="SphereShape3D" id="boss_shape"]
+radius = 2.2
+
+[sub_resource type="StandardMaterial3D" id="boss_coat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.92, 0.92, 0.97, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_fur"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.55, 0.35, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_glass"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(1, 0.85, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="boss_body"]
+material = SubResource("boss_coat")
+radius = 1.1
+height = 2.6
+
+[sub_resource type="SphereMesh" id="boss_head"]
+material = SubResource("boss_fur")
+radius = 0.8
+height = 1.6
+
+[sub_resource type="SphereMesh" id="boss_goggle"]
+material = SubResource("boss_glass")
+radius = 0.3
+height = 0.6
+[sub_resource type="ProceduralSkyMaterial" id="skymat"]
+sky_top_color = Color(0.3, 0.5, 0.88, 1)
+sky_horizon_color = Color(1, 0.84, 0.6, 1)
+ground_horizon_color = Color(1, 0.84, 0.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="backdrop"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.66, 0.48, 0.32, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("skymat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 2
+ambient_light_color = Color(1, 0.93, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="bd_1"]
+material = SubResource("backdrop")
+size = Vector3(14, 90, 360)
+
+[sub_resource type="BoxMesh" id="bd_2"]
+material = SubResource("backdrop")
+size = Vector3(14, 90, 360)
+
+[sub_resource type="BoxMesh" id="bd_3"]
+material = SubResource("backdrop")
+size = Vector3(60, 80, 6)
+
+
+[node name="Temple" type="Node3D"]
+
+[node name="Env" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8, -0.35, 0.5, 0, 0.82, 0.57, -0.6, -0.46, 0.66, 0, 20, 0)
+shadow_enabled = true
+
+
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 4)
+
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("Target", "Arm", "Cam")]
+script = ExtResource("4")
+Target = NodePath("../Player")
+Arm = NodePath("Arm")
+Cam = NodePath("Arm/Camera3D")
+
+[node name="Arm" type="SpringArm3D" parent="CameraRig"]
+spring_length = 6.0
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Arm"]
+current = true
+
+[node name="Hud" parent="." instance=ExtResource("3")]
+
+[node name="LevelController" type="Node" parent="."]
+script = ExtResource("13")
+LevelTitle = "Antik TapÄ±nak"
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="T0" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -18)
+use_collision = true
+size = Vector3(20, 1, 56)
+material = SubResource("ground")
+
+[node name="WallA" type="CSGBox3D" parent="Geometry" groups=["climbable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -49)
+use_collision = true
+size = Vector3(22, 12, 6)
+material = SubResource("accent")
+
+[node name="T1" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.5, -74)
+use_collision = true
+size = Vector3(20, 1, 44)
+material = SubResource("ground")
+
+[node name="F2" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5, -123)
+use_collision = true
+size = Vector3(20, 1, 54)
+material = SubResource("ground")
+
+[node name="WallB" type="CSGBox3D" parent="Geometry" groups=["climbable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -153)
+use_collision = true
+size = Vector3(22, 12, 6)
+material = SubResource("accent")
+
+[node name="T3" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, -178)
+use_collision = true
+size = Vector3(20, 1, 44)
+material = SubResource("ground")
+
+[node name="F5" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10.5, -227)
+use_collision = true
+size = Vector3(20, 1, 54)
+material = SubResource("ground")
+
+[node name="WallC" type="CSGBox3D" parent="Geometry" groups=["climbable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, -257)
+use_collision = true
+size = Vector3(22, 10, 6)
+material = SubResource("accent")
+
+[node name="T4" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -286)
+use_collision = true
+size = Vector3(20, 1, 52)
+material = SubResource("ground")
+
+[node name="Rails" type="Node3D" parent="."]
+
+[node name="RailDescent" type="Path3D" parent="Rails"]
+script = ExtResource("7")
+Points = PackedVector3Array(0, 10.8, -198, 0, 8.5, -215, 0, 5, -235, 0, 1.5, -253)
+
+[node name="PounceTargets" type="Node3D" parent="."]
+
+[node name="T1" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -205)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/T1"]
+mesh = SubResource("target_mesh")
+
+[node name="T2" type="Node3D" parent="PounceTargets"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, -1, -225)
+script = ExtResource("8")
+
+[node name="Mesh" type="MeshInstance3D" parent="PounceTargets/T2"]
+mesh = SubResource("target_mesh")
+
+[node name="Fish" type="Node3D" parent="."]
+
+[node name="F1" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -2)
+
+[node name="F2" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -7.25)
+
+[node name="F3" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -12.5)
+
+[node name="F4" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -17.75)
+
+[node name="F5" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -23)
+
+[node name="F6" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -28.25)
+
+[node name="F7" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -33.5)
+
+[node name="F8" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -38.75)
+
+[node name="F9" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -44)
+
+[node name="F10" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -47.5)
+
+[node name="F11" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -47.5)
+
+[node name="F12" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, -47.5)
+
+[node name="F13" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -56)
+
+[node name="F14" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -61.4286)
+
+[node name="F15" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -66.8571)
+
+[node name="F16" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -72.2857)
+
+[node name="F17" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -77.7143)
+
+[node name="F18" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -83.1429)
+
+[node name="F19" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -88.5714)
+
+[node name="F20" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.2, -94)
+
+[node name="F21" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -100)
+
+[node name="F22" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -104)
+
+[node name="F23" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -108)
+
+[node name="F24" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -112)
+
+[node name="F25" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -117.1429)
+
+[node name="F26" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -122.2857)
+
+[node name="F27" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -127.4286)
+
+[node name="F28" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -132.5714)
+
+[node name="F29" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -137.7143)
+
+[node name="F30" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -142.8571)
+
+[node name="F31" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.8, -148)
+
+[node name="F32" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -151.5)
+
+[node name="F33" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -151.5)
+
+[node name="F34" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, -151.5)
+
+[node name="F35" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -160)
+
+[node name="F36" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -166.1667)
+
+[node name="F37" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -172.3333)
+
+[node name="F38" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -178.5)
+
+[node name="F39" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -184.6667)
+
+[node name="F40" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -190.8333)
+
+[node name="F41" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.2, -197)
+
+[node name="F42" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -203)
+
+[node name="F43" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -209.7143)
+
+[node name="F44" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -216.4286)
+
+[node name="F45" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -223.1429)
+
+[node name="F46" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -229.8571)
+
+[node name="F47" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -236.5714)
+
+[node name="F48" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -243.2857)
+
+[node name="F49" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.5, -250)
+
+[node name="F50" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -204)
+
+[node name="F51" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -211.6667)
+
+[node name="F52" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -219.3333)
+
+[node name="F53" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -227)
+
+[node name="F54" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -234.6667)
+
+[node name="F55" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -242.3333)
+
+[node name="F56" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -8.8, -250)
+
+[node name="F57" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -262)
+
+[node name="F58" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -267.3333)
+
+[node name="F59" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -272.6667)
+
+[node name="F60" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -278)
+
+[node name="F61" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -283.3333)
+
+[node name="F62" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -288.6667)
+
+[node name="F63" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -294)
+
+[node name="F64" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -299.3333)
+
+[node name="F65" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -304.6667)
+
+[node name="F66" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -310)
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="E1" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -22)
+PatrolOffset = Vector3(6, 0, 0)
+
+[node name="E2" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -36)
+PatrolOffset = Vector3(-6, 0, 0)
+
+[node name="E3" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, -66)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E4" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, -84)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E5" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, -2, -110)
+PatrolOffset = Vector3(0, 0, 6)
+
+[node name="E6" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, -2, -135)
+PatrolOffset = Vector3(0, 0, -6)
+
+[node name="E7" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -176)
+PatrolOffset = Vector3(6, 0, 0)
+
+[node name="E8" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, -225)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="E9" parent="Enemies" instance=ExtResource("10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -282)
+PatrolOffset = Vector3(8, 0, 0)
+
+[node name="Decor" type="Node3D" parent="."]
+
+[node name="BD1" type="MeshInstance3D" parent="Decor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, -4, -150)
+mesh = SubResource("bd_1")
+
+[node name="BD2" type="MeshInstance3D" parent="Decor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, -4, -150)
+mesh = SubResource("bd_2")
+
+[node name="BD3" type="MeshInstance3D" parent="Decor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 18)
+mesh = SubResource("bd_3")
+
+[node name="D1" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.9659, 0, -0.2588, 0, 1, 0, 0.2588, 0, 0.9659, 8.6, 0, 8)
+script = ExtResource("23")
+
+[node name="D2" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.866, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866, -8.6, 0, -6)
+script = ExtResource("23")
+
+[node name="D3" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, 0.7071, 8.6, 0, -20)
+script = ExtResource("23")
+
+[node name="D4" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -8.4, 0, -25)
+script = ExtResource("23")
+
+[node name="D5" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.5, 0, -0.866, 0, 1, 0, 0.866, 0, 0.5, -8.6, 0, -34)
+script = ExtResource("23")
+
+[node name="D6" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.2588, 0, -0.9659, 0, 1, 0, 0.9659, 0, 0.2588, 8.6, 12, -54)
+script = ExtResource("23")
+
+[node name="D7" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -7.6, 12, -61)
+script = ExtResource("23")
+
+[node name="D8" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -8.6, 12, -68)
+script = ExtResource("23")
+
+[node name="D9" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.4, 12, -73)
+script = ExtResource("23")
+
+[node name="D10" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.2588, 0, -0.9659, 0, 1, 0, 0.9659, 0, -0.2588, 8.6, 12, -82)
+script = ExtResource("23")
+
+[node name="D11" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.5, 0, -0.866, 0, 1, 0, 0.866, 0, -0.5, -8.6, -2, -98)
+script = ExtResource("23")
+
+[node name="D12" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 8.6, -2, -112)
+script = ExtResource("23")
+
+[node name="D13" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -8.4, -2, -117)
+script = ExtResource("23")
+
+[node name="D14" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.866, 0, -0.5, 0, 1, 0, 0.5, 0, -0.866, -8.6, -2, -126)
+script = ExtResource("23")
+
+[node name="D15" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.6, -2, -133)
+script = ExtResource("23")
+
+[node name="D16" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.9659, 0, -0.2588, 0, 1, 0, 0.2588, 0, -0.9659, 8.6, -2, -140)
+script = ExtResource("23")
+
+[node name="D17" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -8.6, 10, -158)
+script = ExtResource("23")
+
+[node name="D18" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.4, 10, -163)
+script = ExtResource("23")
+
+[node name="D19" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.9659, 0, 0.2588, 0, 1, 0, -0.2588, 0, -0.9659, 8.6, 10, -172)
+script = ExtResource("23")
+
+[node name="D20" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.866, 0, 0.5, 0, 1, 0, -0.5, 0, -0.866, -8.6, 10, -186)
+script = ExtResource("23")
+
+[node name="D21" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, -0.7071, 8.6, -10, -204)
+script = ExtResource("23")
+
+[node name="D22" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -8.4, -10, -209)
+script = ExtResource("23")
+
+[node name="D23" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -7.6, -10, -211)
+script = ExtResource("23")
+
+[node name="D24" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.5, 0, 0.866, 0, 1, 0, -0.866, 0, -0.5, -8.6, -10, -218)
+script = ExtResource("23")
+
+[node name="D25" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(-0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, -0.2588, 8.6, -10, -232)
+script = ExtResource("23")
+
+[node name="D26" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -8.6, -10, -246)
+script = ExtResource("23")
+
+[node name="D27" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 8.4, -10, -251)
+script = ExtResource("23")
+
+[node name="D28" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.2588, 0, 0.9659, 0, 1, 0, -0.9659, 0, 0.2588, 8.6, 0, -262)
+script = ExtResource("23")
+
+[node name="D29" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.5, 0, 0.866, 0, 1, 0, -0.866, 0, 0.5, -8.6, 0, -276)
+script = ExtResource("23")
+
+[node name="D30" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.6, 0, -283)
+script = ExtResource("23")
+
+[node name="D31" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.7071, 0, 0.7071, 0, 1, 0, -0.7071, 0, 0.7071, 8.6, 0, -290)
+script = ExtResource("23")
+
+[node name="D32" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -8.4, 0, -295)
+script = ExtResource("23")
+
+[node name="D33" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, -8.6, 0, -304)
+script = ExtResource("23")
+
+[node name="D34" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 0, 0, -30)
+script = ExtResource("23")
+
+[node name="D35" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 0, 12, -75)
+script = ExtResource("23")
+
+[node name="D36" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 0, -2, -130)
+script = ExtResource("23")
+
+[node name="D37" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 0, 10, -185)
+script = ExtResource("23")
+
+[node name="D38" parent="Decor" instance=ExtResource("e3")]
+transform = Transform3D(1.9, 0, 0, 0, 1.9, 0, 0, 0, 1.9, 0, 0, -290)
+script = ExtResource("23")
+
+[node name="D39" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.8126, 0, 0.8452, 0, 2, 0, -0.8452, 0, 1.8126, 19, -25, -5)
+script = ExtResource("23")
+
+[node name="D40" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(2.125, 0, 0.5694, 0, 2.2, 0, -0.5694, 0, 2.125, -27, -19, -15)
+script = ExtResource("23")
+
+[node name="D41" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.6383, 0, 1.1472, 0, 2, 0, -1.1472, 0, -1.6383, 19, -23, -29)
+script = ExtResource("23")
+
+[node name="D42" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(0.1151, 0, 2.197, 0, 2.2, 0, -2.197, 0, 0.1151, -27, -19, -39)
+script = ExtResource("23")
+
+[node name="D43" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-0.1743, 0, -1.9924, 0, 2, 0, 1.9924, 0, -0.1743, 19, -21, -53)
+script = ExtResource("23")
+
+[node name="D44" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-2.0539, 0, 0.7884, 0, 2.2, 0, -0.7884, 0, -2.0539, -27, -19, -63)
+script = ExtResource("23")
+
+[node name="D45" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.8126, 0, 0.8452, 0, 2, 0, -0.8452, 0, 1.8126, 19, -19, -77)
+script = ExtResource("23")
+
+[node name="D46" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.3845, 0, -1.7097, 0, 2.2, 0, 1.7097, 0, -1.3845, -27, -19, -87)
+script = ExtResource("23")
+
+[node name="D47" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.6383, 0, 1.1472, 0, 2, 0, -1.1472, 0, -1.6383, 19, -17, -101)
+script = ExtResource("23")
+
+[node name="D48" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.1982, 0, -1.8451, 0, 2.2, 0, 1.8451, 0, 1.1982, -27, -19, -111)
+script = ExtResource("23")
+
+[node name="D49" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-0.1743, 0, -1.9924, 0, 2, 0, 1.9924, 0, -0.1743, 19, -15, -125)
+script = ExtResource("23")
+
+[node name="D50" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(2.125, 0, 0.5694, 0, 2.2, 0, -0.5694, 0, 2.125, -27, -19, -135)
+script = ExtResource("23")
+
+[node name="D51" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.8126, 0, 0.8452, 0, 2, 0, -0.8452, 0, 1.8126, 19, -13, -149)
+script = ExtResource("23")
+
+[node name="D52" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(0.1151, 0, 2.197, 0, 2.2, 0, -2.197, 0, 0.1151, -27, -19, -159)
+script = ExtResource("23")
+
+[node name="D53" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.6383, 0, 1.1472, 0, 2, 0, -1.1472, 0, -1.6383, 19, -25, -173)
+script = ExtResource("23")
+
+[node name="D54" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-2.0539, 0, 0.7884, 0, 2.2, 0, -0.7884, 0, -2.0539, -27, -19, -183)
+script = ExtResource("23")
+
+[node name="D55" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-0.1743, 0, -1.9924, 0, 2, 0, 1.9924, 0, -0.1743, 19, -23, -197)
+script = ExtResource("23")
+
+[node name="D56" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.3845, 0, -1.7097, 0, 2.2, 0, 1.7097, 0, -1.3845, -27, -19, -207)
+script = ExtResource("23")
+
+[node name="D57" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.8126, 0, 0.8452, 0, 2, 0, -0.8452, 0, 1.8126, 19, -21, -221)
+script = ExtResource("23")
+
+[node name="D58" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.1982, 0, -1.8451, 0, 2.2, 0, 1.8451, 0, 1.1982, -27, -19, -231)
+script = ExtResource("23")
+
+[node name="D59" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.6383, 0, 1.1472, 0, 2, 0, -1.1472, 0, -1.6383, 19, -19, -245)
+script = ExtResource("23")
+
+[node name="D60" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(2.125, 0, 0.5694, 0, 2.2, 0, -0.5694, 0, 2.125, -27, -19, -255)
+script = ExtResource("23")
+
+[node name="D61" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-0.1743, 0, -1.9924, 0, 2, 0, 1.9924, 0, -0.1743, 19, -17, -269)
+script = ExtResource("23")
+
+[node name="D62" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(0.1151, 0, 2.197, 0, 2.2, 0, -2.197, 0, 0.1151, -27, -19, -279)
+script = ExtResource("23")
+
+[node name="D63" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(1.8126, 0, 0.8452, 0, 2, 0, -0.8452, 0, 1.8126, 19, -15, -293)
+script = ExtResource("23")
+
+[node name="D64" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-2.0539, 0, 0.7884, 0, 2.2, 0, -0.7884, 0, -2.0539, -27, -19, -303)
+script = ExtResource("23")
+
+[node name="D65" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.6383, 0, 1.1472, 0, 2, 0, -1.1472, 0, -1.6383, 19, -13, -317)
+script = ExtResource("23")
+
+[node name="D66" parent="Decor" instance=ExtResource("e4")]
+transform = Transform3D(-1.3845, 0, -1.7097, 0, 2.2, 0, 1.7097, 0, -1.3845, -27, -19, -327)
+script = ExtResource("23")
+
+[node name="Barriers" type="Node3D" parent="."]
+
+[node name="B1" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 0, 10)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 56
+
+[node name="B2" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, 10)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 56
+
+[node name="B3" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 12, -52)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 44
+
+[node name="B4" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 12, -52)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 44
+
+[node name="B5" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, -2, -96)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 54
+
+[node name="B6" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, -2, -96)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 54
+
+[node name="B7" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 10, -156)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 44
+
+[node name="B8" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 10, -156)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 44
+
+[node name="B9" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, -10, -200)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 54
+
+[node name="B10" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, -10, -200)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 54
+
+[node name="B11" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 0, -254)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 58
+
+[node name="B12" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 0, -254)
+script = ExtResource("e6")
+Piece = ExtResource("e5")
+Length = 58
+
+[node name="W13" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.7, -14, 12)
+script = ExtResource("e6")
+Length = 326
+WallHeight = 50
+
+[node name="W14" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.7, -14, 12)
+script = ExtResource("e6")
+Length = 326
+WallHeight = 50
+
+[node name="W15" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 10, -14, 12)
+script = ExtResource("e6")
+Length = 20
+WallHeight = 50
+
+[node name="W16" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 10, -14, -313.5)
+script = ExtResource("e6")
+Length = 20
+WallHeight = 50
+
+[node name="Dresser" type="Node" parent="."]
+script = ExtResource("e9")
+GroundTile = ExtResource("e7")
+RampTile = ExtResource("e8")
+
+[node name="CP1" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, -80)
+
+[node name="CP2" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -125)
+
+[node name="CP3" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -180)
+
+[node name="CP4" parent="." instance=ExtResource("11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -272)
+
+[node name="StormCore" parent="." instance=ExtResource("12")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -300)

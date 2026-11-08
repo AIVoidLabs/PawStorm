@@ -156,19 +156,19 @@ public partial class MainMenu : Control
 		panel.AddChild(v);
 		v.AddChild(UiStyle.MakeLabel("Bölüm Seç", 44, new Color(1f, 0.78f, 0.2f), outline: true));
 
-		var grid = new GridContainer { Columns = 3 };
+		var grid = new GridContainer { Columns = 5 };
 		grid.AddThemeConstantOverride("h_separation", 16);
 		grid.AddThemeConstantOverride("v_separation", 16);
 		v.AddChild(grid);
 		for (int i = 0; i < Levels.All.Length; i++)
 		{
 			var info = Levels.All[i];
-			var b = UiStyle.MakeButton($"{i + 1}. {info.Title}", () => Launch(info.Path), 22, new Vector2(250, 190));
+			var b = UiStyle.MakeButton($"{i + 1}. {info.Title}", () => Launch(info.Path), 18, new Vector2(210, 160));
 			b.Icon = _backgrounds[i];
 			b.ExpandIcon = true;
 			b.VerticalIconAlignment = VerticalAlignment.Top;
 			b.IconAlignment = HorizontalAlignment.Center;
-			b.AddThemeConstantOverride("icon_max_width", 228);
+			b.AddThemeConstantOverride("icon_max_width", 190);
 			grid.AddChild(b);
 		}
 		_levelBack = UiStyle.MakeButton("Geri", HidePanels, 28, new Vector2(240, 54));

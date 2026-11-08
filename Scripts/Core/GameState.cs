@@ -15,6 +15,7 @@ public static class GameState
 	/// <summary>Boss health for the HUD (0 max = no boss in this level).</summary>
 	public static int BossHp { get; set; }
 	public static int BossMaxHp { get; set; }
+	public static string BossName { get; set; } = "";
 
 	public static event EventHandler FishChanged;
 	public static event EventHandler LivesChanged;
@@ -51,11 +52,12 @@ public static class GameState
 		return over;
 	}
 
-	public static void CompleteLevel()
+	/// <param name="grantsShard">False for boss levels (they do not give a Storm Core shard).</param>
+	public static void CompleteLevel(bool grantsShard = true)
 	{
 		if (LevelDone) return;
 		LevelDone = true;
-		CoreShards++;
+		if (grantsShard) CoreShards++;
 		LevelCompleted?.Invoke(null, EventArgs.Empty);
 	}
 }

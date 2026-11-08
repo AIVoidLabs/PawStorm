@@ -1,0 +1,405 @@
+[gd_scene load_steps=30 format=3]
+
+[ext_resource type="Material" path="res://Art/Materials/Outline.tres" id="outline"]
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Fish.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Hud.tscn" id="3"]
+[ext_resource type="Script" path="res://Scripts/Camera/FollowCamera.cs" id="4"]
+[ext_resource type="Script" path="res://Scripts/Core/WindZone.cs" id="5"]
+[ext_resource type="Script" path="res://Scripts/Core/FloatingProp.cs" id="6"]
+[ext_resource type="Script" path="res://Scripts/Core/GrindRail.cs" id="7"]
+[ext_resource type="Script" path="res://Scripts/Enemies/PounceTarget.cs" id="8"]
+[ext_resource type="Script" path="res://Scripts/Core/LoopTrack.cs" id="9"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Enemy.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/Checkpoint.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
+[ext_resource type="Script" path="res://Scripts/Enemies/DrKennel.cs" id="14"]
+[ext_resource type="PackedScene" path="res://Art/Models/Tree.glb" id="20"]
+[ext_resource type="PackedScene" path="res://Art/Models/Crate.glb" id="21"]
+[ext_resource type="PackedScene" path="res://Art/Models/DrKennel.glb" id="22"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Spire.glb" id="e0"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Banner.glb" id="e1"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/Brazier.glb" id="e2"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RailFortress.glb" id="e3"]
+[ext_resource type="Script" path="res://Scripts/Core/BarrierLine.cs" id="e4"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/TileFortress.glb" id="e5"]
+[ext_resource type="PackedScene" path="res://Art/Models/Env/RampFortress.glb" id="e6"]
+[ext_resource type="Script" path="res://Scripts/Core/LevelDresser.cs" id="e7"]
+[ext_resource type="Script" path="res://Scripts/Core/LightningFlash.cs" id="e8"]
+[ext_resource type="Script" path="res://Scripts/Enemies/GeneralGrowl.cs" id="e9"]
+[ext_resource type="PackedScene" path="res://Art/Models/GeneralGrowl.glb" id="e10"]
+
+[sub_resource type="StandardMaterial3D" id="ground"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.14, 0.15, 0.22, 1)
+
+[sub_resource type="StandardMaterial3D" id="accent"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.5, 0.12, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="plat_mat"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.3, 0.32, 0.44, 1)
+
+[sub_resource type="StandardMaterial3D" id="target_mat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(1, 0.2, 0.2, 1)
+emission_enabled = true
+emission = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="target_mesh"]
+material = SubResource("target_mat")
+radius = 0.5
+height = 1.0
+
+[sub_resource type="BoxShape3D" id="plat_shape"]
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxMesh" id="plat_mesh"]
+material = SubResource("plat_mat")
+size = Vector3(6, 0.6, 6)
+
+[sub_resource type="BoxShape3D" id="loop_trigger"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="SphereShape3D" id="boss_shape"]
+radius = 2.2
+
+[sub_resource type="StandardMaterial3D" id="boss_coat"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.92, 0.92, 0.97, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_fur"]
+diffuse_mode = 3
+specular_mode = 2
+next_pass = ExtResource("outline")
+albedo_color = Color(0.55, 0.35, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="boss_glass"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(1, 0.85, 0.2, 1)
+
+[sub_resource type="CapsuleMesh" id="boss_body"]
+material = SubResource("boss_coat")
+radius = 1.1
+height = 2.6
+
+[sub_resource type="SphereMesh" id="boss_head"]
+material = SubResource("boss_fur")
+radius = 0.8
+height = 1.6
+
+[sub_resource type="SphereMesh" id="boss_goggle"]
+material = SubResource("boss_glass")
+radius = 0.3
+height = 0.6
+[sub_resource type="ProceduralSkyMaterial" id="skymat"]
+sky_top_color = Color(0.04, 0.04, 0.1, 1)
+sky_horizon_color = Color(0.22, 0.16, 0.34, 1)
+ground_horizon_color = Color(0.22, 0.16, 0.34, 1)
+
+[sub_resource type="StandardMaterial3D" id="backdrop"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = Color(0.2, 0.2, 0.25, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("skymat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.5, 0.52, 0.8, 1)
+fog_enabled = true
+fog_light_color = Color(0.1, 0.09, 0.2, 1)
+fog_density = 0.012
+[sub_resource type="CapsuleShape3D" id="growl_shape"]
+radius = 1.8
+height = 4.8
+
+
+[node name="StormFortress" type="Node3D"]
+
+[node name="Env" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8, -0.35, 0.5, 0, 0.82, 0.57, -0.6, -0.46, 0.66, 0, 20, 0)
+shadow_enabled = true
+light_energy = 0.6
+
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 28)
+
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("Target", "Arm", "Cam")]
+script = ExtResource("4")
+Target = NodePath("../Player")
+Arm = NodePath("Arm")
+Cam = NodePath("Arm/Camera3D")
+
+[node name="Arm" type="SpringArm3D" parent="CameraRig"]
+spring_length = 6.0
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Arm"]
+current = true
+
+[node name="Hud" parent="." instance=ExtResource("3")]
+
+[node name="LevelController" type="Node" parent="."]
+script = ExtResource("13")
+LevelTitle = "General Growl"
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="Arena" type="CSGBox3D" parent="Geometry"]
+metadata/skin = "ground"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(70, 1, 70)
+material = SubResource("ground")
+
+[node name="CoverA" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -4)
+use_collision = true
+size = Vector3(4, 12, 4)
+material = SubResource("accent")
+
+[node name="CoverB" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -4)
+use_collision = true
+size = Vector3(4, 12, 4)
+material = SubResource("accent")
+
+[node name="CoverC" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, 12)
+use_collision = true
+size = Vector3(4, 12, 4)
+material = SubResource("accent")
+
+[node name="CoverD" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 12)
+use_collision = true
+size = Vector3(4, 12, 4)
+material = SubResource("accent")
+
+[node name="CoverE" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+use_collision = true
+size = Vector3(4, 12, 4)
+material = SubResource("accent")
+
+[node name="Rails" type="Node3D" parent="."]
+
+[node name="PounceTargets" type="Node3D" parent="."]
+
+[node name="Fish" type="Node3D" parent="."]
+
+[node name="F1" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1.2, 0)
+
+[node name="F2" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.4252, 1.2, 11.281)
+
+[node name="F3" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.2107, 1.2, 20.3277)
+
+[node name="F4" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7855, 1.2, 25.3481)
+
+[node name="F5" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7857, 1.2, 25.3481)
+
+[node name="F6" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2108, 1.2, 20.3275)
+
+[node name="F7" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.4253, 1.2, 11.2808)
+
+[node name="F8" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.2, -0.0002)
+
+[node name="F9" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.4251, 1.2, -11.2812)
+
+[node name="F10" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.2105, 1.2, -20.3278)
+
+[node name="F11" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7853, 1.2, -25.3482)
+
+[node name="F12" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7858, 1.2, -25.3481)
+
+[node name="F13" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.211, 1.2, -20.3274)
+
+[node name="F14" parent="Fish" instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.4253, 1.2, -11.2807)
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Decor" type="Node3D" parent="."]
+
+[node name="D1" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.6, 0, 0, 0, 2, 0, 0, 0, 1.6, 46, -30, -30)
+script = ExtResource("23")
+
+[node name="D2" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.6, 0, 0, 0, 2.4, 0, 0, 0, 1.6, -46, -30, -30)
+script = ExtResource("23")
+
+[node name="D3" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.6, 0, 0, 0, 1.8, 0, 0, 0, 1.6, 46, -30, 20)
+script = ExtResource("23")
+
+[node name="D4" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.6, 0, 0, 0, 2.2, 0, 0, 0, 1.6, -46, -30, 20)
+script = ExtResource("23")
+
+[node name="D5" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(2, 0, 0, 0, 2.8, 0, 0, 0, 2, 0, -40, -62)
+script = ExtResource("23")
+
+[node name="D6" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.4, 0, 0, 0, 2.2, 0, 0, 0, 1.4, 25, -34, -58)
+script = ExtResource("23")
+
+[node name="D7" parent="Decor" instance=ExtResource("e0")]
+transform = Transform3D(1.4, 0, 0, 0, 2, 0, 0, 0, 1.4, -25, -34, -58)
+script = ExtResource("23")
+
+[node name="D8" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, -27, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D9" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, -18, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D10" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -14, 0, -36.5)
+script = ExtResource("23")
+
+[node name="D11" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, -9, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D12" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D13" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4, 0, -36.5)
+script = ExtResource("23")
+
+[node name="D14" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 9, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D15" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 18, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D16" parent="Decor" instance=ExtResource("e2")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 22, 0, -36.5)
+script = ExtResource("23")
+
+[node name="D17" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 27, 0, -37.5)
+script = ExtResource("23")
+
+[node name="D18" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(0, 0, -1.3, 0, 1.3, 0, 1.3, 0, 0, 37, 0, -10)
+script = ExtResource("23")
+
+[node name="D19" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(0, 0, -1.3, 0, 1.3, 0, 1.3, 0, 0, -37, 0, -10)
+script = ExtResource("23")
+
+[node name="D20" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(0, 0, -1.3, 0, 1.3, 0, 1.3, 0, 0, 37, 0, 14)
+script = ExtResource("23")
+
+[node name="D21" parent="Decor" instance=ExtResource("e1")]
+transform = Transform3D(0, 0, -1.3, 0, 1.3, 0, 1.3, 0, 0, -37, 0, 14)
+script = ExtResource("23")
+
+[node name="Barriers" type="Node3D" parent="."]
+
+[node name="B1" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.5, 0, 35)
+script = ExtResource("e4")
+Piece = ExtResource("e3")
+Length = 70
+
+[node name="B2" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.5, 0, 35)
+script = ExtResource("e4")
+Piece = ExtResource("e3")
+Length = 70
+
+[node name="B3" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 35, 0, 34.5)
+script = ExtResource("e4")
+Piece = ExtResource("e3")
+Length = 70
+
+[node name="B4" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 35, 0, -34.5)
+script = ExtResource("e4")
+Piece = ExtResource("e3")
+Length = 70
+
+[node name="W5" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.8, -6, 36)
+script = ExtResource("e4")
+Length = 72
+WallHeight = 40
+
+[node name="W6" type="Node3D" parent="Barriers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.8, -6, 36)
+script = ExtResource("e4")
+Length = 72
+WallHeight = 40
+
+[node name="W7" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 36, -6, 34.8)
+script = ExtResource("e4")
+Length = 72
+WallHeight = 40
+
+[node name="W8" type="Node3D" parent="Barriers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 36, -6, -34.8)
+script = ExtResource("e4")
+Length = 72
+WallHeight = 40
+
+[node name="Dresser" type="Node" parent="."]
+script = ExtResource("e7")
+GroundTile = ExtResource("e5")
+RampTile = ExtResource("e6")
+
+[node name="Storm" type="Node" parent="."]
+script = ExtResource("e8")
+
+[node name="Boss" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -26)
+script = ExtResource("e9")
+
+[node name="Collision" type="CollisionShape3D" parent="Boss"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
+shape = SubResource("growl_shape")
+
+[node name="Model" parent="Boss" instance=ExtResource("e10")]
+script = ExtResource("23")

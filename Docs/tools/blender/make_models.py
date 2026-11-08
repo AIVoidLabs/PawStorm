@@ -109,6 +109,10 @@ def add(kind, loc, m, scale=(1, 1, 1), rot=(0, 0, 0), smooth=True, bone=None, **
     return o
 
 
+def cyl(loc, r, d, m, **kw):
+    """Cylinder shortcut: cyl(location, radius, depth, material, seg=..., bone=...)."""
+    return add("cyl", loc, m, r=r, d=d, **kw)
+
 def mirror_x(fn):
     """Call fn(sign) for the left (-1) and right (+1) side."""
     for s in (-1, 1):
@@ -529,10 +533,82 @@ def tree():
     add("ico", (-0.1, 0.0, 4.3), g3, r=0.75, sub=2)
     finish("Tree")
 
+# ================= GENERAL GROWL (final boss: armoured robot wolf with a laser cannon arm) =================
+
+def general_growl():
+    st, dk, rd = mat("steel", (0.28, 0.3, 0.4)), mat("darksteel", (0.14, 0.15, 0.2)), mat("red", (0.9, 0.15, 0.2))
+    core, eye, cannon, bk = mat("core", (0.25, 0.95, 1.0), emissive=2.5), mat("eye", (1.0, 0.15, 0.1), emissive=3.0), mat("cannon", (1.0, 0.45, 0.1), emissive=2.5), mat("black", BLACK)
+    # torso, hips, back details
+    add("cube", (0, 0, 3.3), st, scale=(2.7, 1.7, 2.0), smooth=False, bone="Body")
+    add("cube", (0, 0, 2.2), dk, scale=(2.0, 1.3, 0.8), smooth=False, bone="Body")
+    add("cube", (0, 0.86, 3.6), dk, scale=(1.5, 0.12, 1.0), smooth=False, bone="Body")          # chest plate
+    add("sphere", (0, 0.95, 3.5), core, r=0.42, seg=14, rings=8, bone="Body")                     # glowing core (the weak spot)
+    add("torus", (0, 0.92, 3.5), rd, scale=(1, 0.2, 1), r=0.55, minor=0.07, seg=18, bone="Body")
+    for x in (-0.6, 0.6):
+        cyl((x, -0.95, 3.7), 0.25, 1.3, dk, seg=10, bone="Body")                                   # exhausts
+    cyl((0.9, -0.9, 4.6), 0.05, 1.6, dk, seg=6, bone="Body")
+    add("sphere", (0.9, -0.9, 5.4), rd, r=0.1, seg=8, rings=6, bone="Body")
+    # head (wolf)
+    add("sphere", (0, 0.4, 5.0), st, scale=(0.75, 0.8, 0.68), seg=16, rings=10, bone="Head")
+    add("cone", (0, 1.25, 4.85), dk, rot=(-math.pi / 2, 0, 0), r=0.42, d=1.1, seg=8, bone="Head")   # snout
+    add("sphere", (0, 1.8, 4.9), rd, r=0.13, seg=8, rings=6, bone="Head")
+    add("cube", (0, 1.25, 4.55), bk, scale=(0.7, 0.9, 0.08), smooth=False, bone="Head")             # jaw line
+    for s in (-1, 1):
+        add("cone", (0.5 * s, 0.1, 5.75), st, rot=(-0.15, 0.2 * s, 0), r=0.3, d=0.9, seg=5, smooth=False, bone="Head")
+        add("sphere", (0.33 * s, 0.85, 5.2), eye, scale=(0.14, 0.08, 0.1), seg=10, rings=6, bone="Head")
+    # shoulders, arms
+    for s, n in ((-1, "L"), (1, "R")):
+        add("sphere", (1.65 * s, 0, 4.0), dk, r=0.65, seg=14, rings=8, bone="Arm" + n)
+        add("cone", (1.7 * s, 0, 4.7), rd, rot=(0, 0.35 * s, 0), r=0.2, d=0.8, seg=5, smooth=False, bone="Arm" + n)
+    cyl((-1.8, 0, 3.0), 0.36, 2.0, st, seg=10, bone="ArmL")
+    add("sphere", (-1.8, 0, 1.9), dk, r=0.5, seg=12, rings=8, bone="ArmL")
+    for x in (-0.25, 0, 0.25):
+        add("cone", (-1.8 + x, 0.35, 1.55), bk, rot=(-math.pi / 2 + 0.5, 0, 0), r=0.09, d=0.5, seg=4, smooth=False, bone="ArmL")
+    cyl((1.8, 0, 2.9), 0.5, 2.2, dk, seg=12, bone="ArmR")                                          # laser cannon barrel (points down at rest)
+    cyl((1.8, 0, 1.7), 0.42, 0.4, st, seg=12, bone="ArmR")
+    add("cone", (1.8, 0, 1.4), cannon, rot=(math.pi, 0, 0), r=0.38, d=0.7, seg=10, bone="ArmR")      # glowing muzzle
+    add("torus", (1.8, 0, 2.4), cannon, r=0.52, minor=0.05, seg=16, bone="ArmR")
+    # legs
+    for s, n in ((-1, "L"), (1, "R")):
+        cyl((0.75 * s, 0, 1.3), 0.38, 1.8, st, seg=10, bone="Leg" + n)
+        add("sphere", (0.75 * s, 0, 2.05), dk, r=0.45, seg=12, rings=8, bone="Leg" + n)
+        add("cube", (0.75 * s, 0.3, 0.2), dk, scale=(0.95, 1.5, 0.4), smooth=False, bone="Leg" + n)  # foot
+        add("cone", (0.75 * s, 1.0, 0.2), rd, rot=(-math.pi / 2, 0, 0), r=0.2, d=0.4, seg=4, smooth=False, bone="Leg" + n)
+    bones = [("Root", (0, 0, 0), None), ("Body", (0, 0, 2.2), "Root"), ("Head", (0, 0.2, 4.5), "Body"),
+             ("ArmL", (-1.65, 0, 4.0), "Body"), ("ArmR", (1.65, 0, 4.0), "Body"),
+             ("LegL", (-0.75, 0, 2.05), "Root"), ("LegR", (0.75, 0, 2.05), "Root")]
+
+    def idle(t):
+        ph = 2 * PI * t
+        return {"Body": {"l": up(0.03 * S(ph)), "r": (0.02 * S(ph + 1), 0.03 * S(ph), 0)}, "Head": {"r": (0.05 * S(ph + 1.5), 0.06 * S(ph), 0)},
+                "ArmL": {"r": (0.06 * S(ph + 1), 0, 0.04 * S(ph))}, "ArmR": {"r": (0.04 * S(ph), 0, 0)}}
+
+    def walk(t):
+        ph = 2 * PI * t
+        return {"Body": {"l": up(0.05 * math.cos(2 * ph)), "r": (0.04 * S(2 * ph), 0.07 * S(ph), 0)}, "Head": {"r": (0.04 * S(2 * ph + 1), 0, 0)},
+                "LegL": {"r": (0.7 * S(ph), 0, 0)}, "LegR": {"r": (0.7 * S(ph + PI), 0, 0)},
+                "ArmL": {"r": (0.3 * S(ph + PI), 0, 0)}, "ArmR": {"r": (0.12 * S(ph), 0, 0)}}
+
+    def aim(t):
+        ph = 2 * PI * t
+        return {"Body": {"r": (-0.08, 0.1 * S(ph), 0)}, "Head": {"r": (-0.1, 0, 0)}, "ArmR": {"r": (1.5 + 0.03 * S(3 * ph), 0, 0)},
+                "ArmL": {"r": (-0.35, 0, 0)}, "LegL": {"r": (0.1, 0, 0)}, "LegR": {"r": (-0.1, 0, 0)}}
+
+    def fire(t):
+        k = t / 0.22 if t < 0.22 else max(0.0, 1.0 - (t - 0.22) / 0.78)
+        return {"Body": {"r": (-0.08 + 0.22 * k, 0, 0)}, "Head": {"r": (-0.1 + 0.2 * k, 0, 0)}, "ArmR": {"r": (1.5 + 0.45 * k, 0, 0)},
+                "ArmL": {"r": (-0.35 - 0.2 * k, 0, 0)}, "LegL": {"r": (0.1 + 0.2 * k, 0, 0)}, "LegR": {"r": (-0.1 - 0.2 * k, 0, 0)}}
+
+    def vent(t):
+        ph = 2 * PI * t
+        return {"Body": {"l": (0.015 * S(6 * ph), -0.15, 0), "r": (0.28 + 0.03 * S(ph), 0, 0)}, "Head": {"r": (-0.6 + 0.05 * S(ph), 0, 0)},
+                "ArmL": {"r": (0.35, 0, 0.15)}, "ArmR": {"r": (0.4, 0, -0.15)}, "LegL": {"r": (0.25, 0, 0)}, "LegR": {"r": (-0.25, 0, 0)}}
+    finish("GeneralGrowl", bones, [("Idle", 48, idle, True, 12), ("Walk", 24, walk, True, 6), ("Aim", 24, aim, True, 6),
+                                   ("Fire", 10, fire, False, 3), ("Vent", 36, vent, True, 9)])
 
 MODELS = {
     "Pati": pati, "Pup": pup, "DrKennel": dr_kennel, "Fish": fish, "StormCore": storm_core,
-    "CheckpointPole": checkpoint_pole, "CheckpointFlag": checkpoint_flag, "Crate": crate, "Tree": tree,
+    "GeneralGrowl": general_growl, "CheckpointPole": checkpoint_pole, "CheckpointFlag": checkpoint_flag, "Crate": crate, "Tree": tree,
 }
 
 if __name__ == "__main__":

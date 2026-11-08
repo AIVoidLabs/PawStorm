@@ -50,10 +50,14 @@ public partial class Hud : CanvasLayer
 	{
 		var level = GetTree().GetFirstNodeInGroup("level_controller") as LevelController;
 		string title = level?.LevelTitle ?? "Level";
-		bool final = Levels.Next((GetTree().CurrentScene?.SceneFilePath ?? "")) == Levels.MainMenu;
-		MessageLabel.Text = (final
-				? "Dr. Kennel yenildi!\nStorm Core birleşti, kediler eve döndü.\nOYUN BİTTİ - Teşekkürler Pati!\n"
-				: $"{title} TAMAM!\nStorm Core parçası: {Mathf.Min(GameState.CoreShards, 5)}/5\n")
+		string path = GetTree().CurrentScene?.SceneFilePath ?? "";
+		var info = Levels.For(path);
+		bool final = info != null && Levels.Next(path) == Levels.MainMenu;
+		string head;
+		if (final) head = $"{title} yenildi!\nStorm Core birleşti, fırtına dindi ve kediler eve döndü.\nOYUN BİTTİ - Teşekkürler Pati!\n";
+		else if (info?.Victory != null) head = info.Victory + "\n";
+		else head = $"{title} TAMAM!\nStorm Core parçası: {GameState.CoreShards}/{Levels.ShardCount}\n";
+		MessageLabel.Text = head
 			+ $"Balık: {GameState.Fish}   Süre: {FormatTime(GameState.LevelTime)}\n\n[Space] devam";
 		MessageLabel.Visible = true;
 	}
@@ -65,7 +69,7 @@ public partial class Hud : CanvasLayer
 		if (_player != null) _chargeBar.Ratio = _player.ChargeRatio;
 		TimeLabel.Text = FormatTime(GameState.LevelTime);
 		if (GameState.BossMaxHp > 0)
-			TimeLabel.Text += $"\nDr. Kennel: {new string('♥', Mathf.Max(GameState.BossHp, 0))}";
+			TimeLabel.Text += $"\n{GameState.BossName}: {new string('♥', Mathf.Max(GameState.BossHp, 0))}";
 		if (_player != null) SpeedLabel.Text = $"Speed: {_player.Speed * 3.6f:0} km/h";
 	}
 }

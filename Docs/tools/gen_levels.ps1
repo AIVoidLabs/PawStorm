@@ -79,7 +79,30 @@ function New-Level($def) {
 		$script:brN++; $pieceId = ResId "res://Art/Models/Env/$piece.glb"; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
 		Add "`n[node name=`"B$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, $(F $x0), 0, $(F $z))`nscript = ExtResource(`"$sid`")`nPiece = ExtResource(`"$pieceId`")`nLength = $(F ([math]::Abs($x0 - $x1)))"
 	}
-	$script:cpN = 0
+	function WallY($name, [double]$x, [double]$ybase, [double]$z, [double]$h, [double]$w, [double]$l, $mat = 'accent') {
+		Add "`n[node name=`"$name`" type=`"CSGBox3D`" parent=`"Geometry`" groups=[`"climbable`"]]`ntransform = $(T $x ($ybase + $h / 2) $z)`nuse_collision = true`nsize = $(V $w $h $l)`nmaterial = SubResource(`"$mat`")"
+	}
+	function BarrierAt([string]$piece, [double]$x, [double]$y, [double]$z0, [double]$z1) {
+		$script:brN++; $pieceId = ResId "res://Art/Models/Env/$piece.glb"; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
+		Add "`n[node name=`"B$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = $(T $x $y $z0)`nscript = ExtResource(`"$sid`")`nPiece = ExtResource(`"$pieceId`")`nLength = $(F ([math]::Abs($z0 - $z1)))"
+	}
+	# invisible tall collision wall along Z (keeps the player inside multi-level maps)
+	function SideWall([double]$x, [double]$ybase, [double]$z0, [double]$z1, [double]$height) {
+		$script:brN++; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
+		Add "`n[node name=`"W$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = $(T $x $ybase $z0)`nscript = ExtResource(`"$sid`")`nLength = $(F ([math]::Abs($z0 - $z1)))`nWallHeight = $(F $height)"
+	}
+	# invisible tall collision wall across X
+	function EndWall([double]$z, [double]$x0, [double]$x1, [double]$ybase, [double]$height) {
+		$script:brN++; $sid = ResId 'res://Scripts/Core/BarrierLine.cs' 'Script'
+		Add "`n[node name=`"W$($script:brN)`" type=`"Node3D`" parent=`"Barriers`"]`ntransform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, $(F $x0), $(F $ybase), $(F $z))`nscript = ExtResource(`"$sid`")`nLength = $(F ([math]::Abs($x0 - $x1)))`nWallHeight = $(F $height)"
+	}
+	$script:bdN = 0
+	# big dark box used as cave/canyon backdrop (no collision)
+	function Backdrop([double]$x, [double]$y, [double]$z, [double]$sx, [double]$sy, [double]$sz) {
+		$script:bdN++; $id = "bd_$($script:bdN)"
+		AddSub "[sub_resource type=`"BoxMesh`" id=`"$id`"]`nmaterial = SubResource(`"backdrop`")`nsize = $(V $sx $sy $sz)`n"
+		Add "`n[node name=`"BD$($script:bdN)`" type=`"MeshInstance3D`" parent=`"Decor`"]`ntransform = $(T $x $y $z)`nmesh = SubResource(`"$id`")"
+	}	$script:cpN = 0
 	function Check([double]$x, [double]$y, [double]$z) { $script:cpN++; Add "`n[node name=`"CP$($script:cpN)`" parent=`".`" instance=ExtResource(`"11`")]`ntransform = $(T $x $y $z)" }
 
 	# ---- body ----
@@ -105,8 +128,14 @@ function New-Level($def) {
 		AddSub "[sub_resource type=`"StandardMaterial3D`" id=`"water_mat`"]`ndiffuse_mode = 3`nspecular_mode = 2`nalbedo_color = Color(0.15, 0.5, 0.75, 1)`n`n[sub_resource type=`"BoxMesh`" id=`"water_mesh`"]`nmaterial = SubResource(`"water_mat`")`nsize = Vector3(600, 0.2, 700)`n"
 		Add "`n[node name=`"Water`" type=`"MeshInstance3D`" parent=`".`"]`ntransform = $(T 0 -6.5 -110)`nmesh = SubResource(`"water_mesh`")"
 	}
+	if ($def.Storm) { $lid = ResId 'res://Scripts/Core/LightningFlash.cs' 'Script'; Add "`n[node name=`"Storm`" type=`"Node`" parent=`".`"]`nscript = ExtResource(`"$lid`")" }
 	if ($def.Extra) { & $def.Extra }
 	$c = $def.Colors
+	$ambSource = if ($c.Ambient) { 2 } else { 3 }
+	$ambient = if ($c.Ambient) { $c.Ambient } else { 'Color(0.8, 0.85, 1, 1)' }
+	$fogLines = if ($c.Fog) { "fog_enabled = true`nfog_light_color = $($c.Fog)`nfog_density = 0.012" } else { '' }
+	$backdropColor = if ($c.Backdrop) { $c.Backdrop } else { 'Color(0.2, 0.2, 0.25, 1)' }
+	$sunLine = if ($def.SunEnergy) { "light_energy = $($def.SunEnergy)" } else { '' }
 	$head = @"
 [gd_scene load_steps=30 format=3]
 
@@ -207,14 +236,20 @@ sky_top_color = $($c.SkyTop)
 sky_horizon_color = $($c.SkyHorizon)
 ground_horizon_color = $($c.SkyHorizon)
 
+[sub_resource type="StandardMaterial3D" id="backdrop"]
+diffuse_mode = 3
+specular_mode = 2
+albedo_color = $backdropColor
+
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("skymat")
 
 [sub_resource type="Environment" id="env"]
 background_mode = 2
 sky = SubResource("sky")
-ambient_light_source = 3
-ambient_light_color = Color(0.8, 0.85, 1, 1)
+ambient_light_source = $ambSource
+ambient_light_color = $ambient
+$fogLines
 
 "@
 	$body = @"
@@ -227,6 +262,7 @@ environment = SubResource("env")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.8, -0.35, 0.5, 0, 0.82, 0.57, -0.6, -0.46, 0.66, 0, 20, 0)
 shadow_enabled = true
+$sunLine
 
 [node name="Player" parent="." instance=ExtResource("1")]
 transform = $(T $def.Start[0] $def.Start[1] $def.Start[2])
@@ -440,4 +476,152 @@ script = ExtResource("23")
 "@
 	}
 	BossResources = $true
+}
+
+
+# ================= 7. CRYSTAL CAVES (climb walls up, drop down ledges) =================
+# Route: P0 (y0) -> DROP -> L1 (y-10) -> CLIMB wall -> P1 (y2) -> DROP -> L2 (y-10) -> CLIMB two walls -> P2 (y10, Storm Core)
+New-Level @{
+	File = 'Level7_CrystalCaves.tscn'; NodeName = 'CrystalCaves'; Title = 'Kristal Mağaralar'; Start = @(0, 1, 4); CoreAt = @(0, 11.8, -262)
+	Colors = @{ Ground = 'Color(0.2, 0.15, 0.28, 1)'; Accent = 'Color(0.32, 0.2, 0.46, 1)'; Platform = 'Color(0.6, 0.4, 0.9, 1)'; SkyTop = 'Color(0.08, 0.05, 0.16, 1)'; SkyHorizon = 'Color(0.22, 0.12, 0.38, 1)'; Backdrop = 'Color(0.1, 0.07, 0.17, 1)'; Fog = 'Color(0.22, 0.13, 0.4, 1)'; Ambient = 'Color(0.85, 0.8, 1, 1)' }
+	SunEnergy = 1.0
+	Theme = @{ Ground = 'TileCrystal'; Ramp = 'RampCrystal' }
+	Geometry = {
+		Plat 'P0' 0 0 -13 20 46
+		Plat 'L1' 0 -10 -63 20 54
+		WallY 'Wall1' 0 -10 -93 12 22 6
+		Plat 'P1' 0 2 -123 20 54
+		Plat 'L2' 0 -10 -175 20 50
+		WallY 'Wall2A' 0 -10 -203 10 22 6
+		WallY 'Wall2B' 0 -10 -209 20 22 6
+		Plat 'P2' 0 10 -241 20 58
+	}
+	Barriers = {
+		BarrierAt 'RailCrystal' 9.5 0 10 -36; BarrierAt 'RailCrystal' -9.5 0 10 -36
+		BarrierAt 'RailCrystal' 9.5 -10 -36 -90; BarrierAt 'RailCrystal' -9.5 -10 -36 -90
+		BarrierAt 'RailCrystal' 9.5 2 -96 -150; BarrierAt 'RailCrystal' -9.5 2 -96 -150
+		BarrierAt 'RailCrystal' 9.5 -10 -150 -200; BarrierAt 'RailCrystal' -9.5 -10 -150 -200
+		BarrierAt 'RailCrystal' 9.5 10 -212 -270; BarrierAt 'RailCrystal' -9.5 10 -212 -270
+		SideWall 9.7 -14 12 -272 50; SideWall -9.7 -14 12 -272 50
+		EndWall 12 10 -10 -14 50; EndWall -271.5 10 -10 -14 50
+	}
+	Enemies = { Enemy -4 -10 -55 6 0 0; Enemy 4 -10 -75 -6 0 0; Enemy 0 2 -115 6 0 0; Enemy -3 2 -135 0 0 6; Enemy 0 -10 -165 8 0 0; Enemy 3 -10 -185 0 0 -6; Enemy 0 10 -235 6 0 0 }
+	Fish = {
+		FishLine 0 1.2 -2 -30 8
+		FishAt 0 -1 -38; FishAt 0 -4 -41; FishAt 0 -7 -44
+		FishLine 0 -8.8 -48 -86 9
+		FishAt 0 -5 -89.5; FishAt 0 -2 -89.5
+		FishLine 0 3.2 -100 -145 9
+		FishAt 0 0 -152; FishAt 0 -4 -155; FishAt 0 -7 -158
+		FishLine 0 -8.8 -162 -196 8
+		FishAt 0 -4 -199.5; FishAt 0 -1 -199.5; FishAt 0 1.2 -203; FishAt 0 5 -205.5; FishAt 0 8 -205.5
+		FishLine 0 11.2 -218 -265 10
+	}
+	Extra = { Check 0 -10 -62; Check 0 2 -120; Check 0 -10 -172 }
+	Decor = {
+		Backdrop 16.4 -5 -130 12 90 330; Backdrop -16.4 -5 -130 12 90 330
+		Backdrop 0 52 -130 60 4 340; Backdrop 0 5 18 60 80 6; Backdrop 0 5 -280 60 80 6
+		$i = 0
+		foreach ($s in @(@(8, -34, 0), @(-38, -88, -10), @(-98, -148, 2), @(-152, -198, -10), @(-214, -268, 10))) {
+			for ($z = $s[0]; $z -gt $s[1]; $z -= 10) {
+				$i++; $side = if ($i % 2) { 1 } else { -1 }
+				Decor 'Crystal' ($side * 8.2) $s[2] $z 1.1 ($i * 40)
+				if ($i % 3 -eq 0) { Decor 'GlowShroom' (-$side * 7.4) $s[2] ($z - 4) 1.6 0 }
+				if ($i % 2 -eq 0) { Decor 'CrystalBig' ($side * 11.2) ($s[2] + 1 + ($i * 3) % 7) ($z - 3) (1.2 + ($i % 3) * 0.25) ($i * 70) }
+				if ($i % 4 -eq 1) { Decor 'Stalagmite' (-$side * 8.3) $s[2] ($z - 6) 1.1 ($i * 30) }
+			}
+		}
+	}
+}
+
+# ================= 8. ANCIENT TEMPLE (climb, drop, rail ride, climb) =================
+# Route: T0 (y0) -> CLIMB -> T1 (y12) -> DROP -> F2 (y-2) -> CLIMB -> T3 (y10) -> RAIL down (or drop to F5 y-10 and CLIMB) -> T4 (y0, Storm Core)
+New-Level @{
+	File = 'Level8_Temple.tscn'; NodeName = 'Temple'; Title = 'Antik Tapınak'; Start = @(0, 1, 4); CoreAt = @(0, 1.8, -300)
+	Colors = @{ Ground = 'Color(0.68, 0.56, 0.38, 1)'; Accent = 'Color(0.55, 0.42, 0.28, 1)'; Platform = 'Color(0.95, 0.8, 0.3, 1)'; SkyTop = 'Color(0.3, 0.5, 0.88, 1)'; SkyHorizon = 'Color(1, 0.84, 0.6, 1)'; Backdrop = 'Color(0.66, 0.48, 0.32, 1)'; Ambient = 'Color(1, 0.93, 0.8, 1)' }
+	Theme = @{ Ground = 'TileTemple'; Ramp = 'RampTemple' }
+	Geometry = {
+		Plat 'T0' 0 0 -18 20 56
+		WallY 'WallA' 0 0 -49 12 22 6
+		Plat 'T1' 0 12 -74 20 44
+		Plat 'F2' 0 -2 -123 20 54
+		WallY 'WallB' 0 -2 -153 12 22 6
+		Plat 'T3' 0 10 -178 20 44
+		Plat 'F5' 0 -10 -227 20 54
+		WallY 'WallC' 0 -10 -257 10 22 6
+		Plat 'T4' 0 0 -286 20 52
+	}
+	Rails = { Rail 'RailDescent' @(@(0, 10.8, -198), @(0, 8.5, -215), @(0, 5.0, -235), @(0, 1.5, -253)) }
+	Barriers = {
+		BarrierAt 'RailTemple' 9.5 0 10 -46; BarrierAt 'RailTemple' -9.5 0 10 -46
+		BarrierAt 'RailTemple' 9.5 12 -52 -96; BarrierAt 'RailTemple' -9.5 12 -52 -96
+		BarrierAt 'RailTemple' 9.5 -2 -96 -150; BarrierAt 'RailTemple' -9.5 -2 -96 -150
+		BarrierAt 'RailTemple' 9.5 10 -156 -200; BarrierAt 'RailTemple' -9.5 10 -156 -200
+		BarrierAt 'RailTemple' 9.5 -10 -200 -254; BarrierAt 'RailTemple' -9.5 -10 -200 -254
+		BarrierAt 'RailTemple' 9.5 0 -254 -312; BarrierAt 'RailTemple' -9.5 0 -254 -312
+		SideWall 9.7 -14 12 -314 50; SideWall -9.7 -14 12 -314 50
+		EndWall 12 10 -10 -14 50; EndWall -313.5 10 -10 -14 50
+	}
+	Enemies = { Enemy -4 0 -22 6 0 0; Enemy 4 0 -36 -6 0 0; Enemy 0 12 -66 8 0 0; Enemy 0 12 -84 8 0 0; Enemy -3 -2 -110 0 0 6; Enemy 3 -2 -135 0 0 -6; Enemy 0 10 -176 6 0 0; Enemy 0 -10 -225 8 0 0; Enemy 0 0 -282 8 0 0 }
+	Targets = { Target 0 -4 -205; Target 3 -1 -225 }
+	Fish = {
+		FishLine 0 1.2 -2 -44 9
+		FishAt 0 5 -47.5; FishAt 0 8 -47.5; FishAt 0 11 -47.5
+		FishLine 0 13.2 -56 -94 8
+		FishAt 0 8 -100; FishAt 0 3 -104; FishAt 0 -1 -108
+		FishLine 0 -0.8 -112 -148 8
+		FishAt 0 2 -151.5; FishAt 0 6 -151.5; FishAt 0 9 -151.5
+		FishLine 0 11.2 -160 -197 7
+		FishLine 0 8.5 -203 -250 8
+		FishLine 0 -8.8 -204 -250 7
+		FishLine 0 1.2 -262 -310 10
+	}
+	Extra = { Check 0 12 -80; Check 0 -2 -125; Check 0 10 -180; Check 0 0 -272 }
+	Decor = {
+		Backdrop 17.5 -4 -150 14 90 360; Backdrop -17.5 -4 -150 14 90 360
+		Backdrop 0 5 18 60 80 6
+		$i = 0
+		foreach ($s in @(@(8, -46, 0), @(-54, -94, 12), @(-98, -148, -2), @(-158, -198, 10), @(-204, -252, -10), @(-262, -310, 0))) {
+			for ($z = $s[0]; $z -gt $s[1]; $z -= 14) {
+				$i++; $side = if ($i % 2) { 1 } else { -1 }
+				Decor 'TemplePillar' ($side * 8.6) $s[2] $z 1 ($i * 15)
+				if ($i % 3 -eq 0) { Decor 'Brazier' (-$side * 8.4) $s[2] ($z - 5) 1.2 0 }
+				if ($i % 5 -eq 0) { Decor 'CatStatue' (-$side * 7.6) $s[2] ($z - 7) 1 ($side * 90) }
+			}
+		}
+		Decor 'Arch' 0 0 -30 1.9 0; Decor 'Arch' 0 12 -75 1.9 0; Decor 'Arch' 0 -2 -130 1.9 0; Decor 'Arch' 0 10 -185 1.9 0; Decor 'Arch' 0 0 -290 1.9 0
+		for ($z = -5; $z -gt -320; $z -= 24) { Decor 'Cloud' (30 + ($z * 7) % 12) (-26 - ($z * 3) % 14) $z 2.0 ($z * 5); Decor 'Cloud' (-32 - ($z * 5) % 10) (-30 - ($z * 7) % 12) ($z - 10) 2.2 ($z * 3) }
+	}
+}
+
+# ================= 9. STORM FORTRESS (boss: General Growl, ranged laser balls) =================
+New-Level @{
+	File = 'Level9_StormFortress.tscn'; NodeName = 'StormFortress'; Title = 'General Growl'; Start = @(0, 1, 28); CoreAt = $null
+	Colors = @{ Ground = 'Color(0.14, 0.15, 0.22, 1)'; Accent = 'Color(0.5, 0.12, 0.2, 1)'; Platform = 'Color(0.3, 0.32, 0.44, 1)'; SkyTop = 'Color(0.04, 0.04, 0.1, 1)'; SkyHorizon = 'Color(0.22, 0.16, 0.34, 1)'; Fog = 'Color(0.1, 0.09, 0.2, 1)'; Ambient = 'Color(0.5, 0.52, 0.8, 1)' }
+	SunEnergy = 0.6; Storm = $true
+	Theme = @{ Ground = 'TileFortress'; Ramp = 'RampFortress' }
+	Geometry = {
+		Plat 'Arena' 0 0 0 70 70
+		Plat 'CoverA' -15 6 -4 4 4 'accent' 12; Plat 'CoverB' 15 6 -4 4 4 'accent' 12
+		Plat 'CoverC' -15 6 12 4 4 'accent' 12; Plat 'CoverD' 15 6 12 4 4 'accent' 12
+		Plat 'CoverE' 0 6 4 4 4 'accent' 12
+	}
+	Barriers = {
+		Barrier 'RailFortress' 34.5 35 -35; Barrier 'RailFortress' -34.5 35 -35
+		BarrierX 'RailFortress' 34.5 35 -35; BarrierX 'RailFortress' -34.5 35 -35
+		SideWall 34.8 -6 36 -36 40; SideWall -34.8 -6 36 -36 40
+		EndWall 34.8 36 -36 -6 40; EndWall -34.8 36 -36 -6 40
+	}
+	Fish = { for ($i = 0; $i -lt 14; $i++) { $a = 6.2832 * $i / 14; FishAt ([math]::Cos($a) * 26) 1.2 ([math]::Sin($a) * 26) } }
+	Decor = {
+		Decor 'Spire' 46 -30 -30 1.6 0 2.0; Decor 'Spire' -46 -30 -30 1.6 0 2.4; Decor 'Spire' 46 -30 20 1.6 0 1.8; Decor 'Spire' -46 -30 20 1.6 0 2.2
+		Decor 'Spire' 0 -40 -62 2.0 0 2.8; Decor 'Spire' 25 -34 -58 1.4 0 2.2; Decor 'Spire' -25 -34 -58 1.4 0 2.0
+		for ($k = -3; $k -le 3; $k++) { Decor 'Banner' ($k * 9) 0 -37.5 1.3 0; if ($k % 2 -eq 0) { Decor 'Brazier' ($k * 9 + 4) 0 -36.5 1.5 0 } }
+		Decor 'Banner' 37 0 -10 1.3 90; Decor 'Banner' -37 0 -10 1.3 90; Decor 'Banner' 37 0 14 1.3 90; Decor 'Banner' -37 0 14 1.3 90
+	}
+	Extra = {
+		$sid = ResId 'res://Scripts/Enemies/GeneralGrowl.cs' 'Script'; $mid = ResId 'res://Art/Models/GeneralGrowl.glb'
+		AddSub "[sub_resource type=`"CapsuleShape3D`" id=`"growl_shape`"]`nradius = 1.8`nheight = 4.8`n"
+		Add "`n[node name=`"Boss`" type=`"Area3D`" parent=`".`"]`ntransform = $(T 0 0 -26)`nscript = ExtResource(`"$sid`")`n`n[node name=`"Collision`" type=`"CollisionShape3D`" parent=`"Boss`"]`ntransform = $(T 0 2.6 0)`nshape = SubResource(`"growl_shape`")`n`n[node name=`"Model`" parent=`"Boss`" instance=ExtResource(`"$mid`")]`nscript = ExtResource(`"23`")"
+	}
 }

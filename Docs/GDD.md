@@ -77,3 +77,9 @@ Pati (Idle, Run, Jump, Fall, Ball, Charge, Hurt, Grind, Climb), Pup (Walk), Dr. 
 
 ## Ses ve menü
 Ses: `Docs/tools/audio/make_audio.py` (Blender'ýn Python'u + numpy ile sentez) -> `Audio/Music` (menü, 5 bölge, boss; 16 ölçülük döngüler), `Audio/Ambient` (rüzgâr, dalga, fabrika uðultusu, orman kuþlarý...), ek efektler. `AudioSettings` Music/SFX/Ambient bus'larýný açar ve ayarý `user://settings.cfg`'ye kaydeder; `Music` bölümler arasý çapraz geçiþ yapar. Menü: `Art/Textures/Menu/*.png` (`Docs/tools/capture_scene.gd` ile oyundan çekilir), `MainMenu` + `UiStyle`.
+
+## Bölüm 7-9 (geniþleme)
+- **7 Kristal Maðaralar:** dikey bölüm. Düþme -> týrmanma -> düþme -> iki aþamalý týrmanma. Neon kristaller, sis, karanlýk maðara.
+- **8 Antik Tapýnak:** týrman, düþ, týrman, ray ile iniþ (rayý kaçýrýrsan alt zeminden týrmanarak devam).
+- **9 Fýrtýna Kalesi - General Growl:** menzilli boss. Lazer toplarý atar (tek, üçlü yay, halka). Topu Pounce ile ya da saldýrýrken dokunarak geri çevir (boss'a hasar), ya da bir salvo sonrasý ýsýnýp sersemlediðinde ona vur (6 can). Hikâye: Dr. Kennel yenilince asýl fýrtýna sahibi General Growl ortaya çýkar.
+- Bölüm 6 artýk final deðil; oyun 9. bölümde biter.

@@ -30,6 +30,7 @@ public partial class DrKennel : Area3D, IPounceable
 		_center = new Vector3(GlobalPosition.X, 0, GlobalPosition.Z);
 		_hp = MaxHp;
 		GameState.BossMaxHp = MaxHp;
+		GameState.BossName = "Dr. Kennel";
 		GameState.BossHp = _hp;
 		_player = GetTree().GetFirstNodeInGroup("player") as PlayerController;
 		_anim = new ModelAnimator(this);
@@ -151,7 +152,7 @@ public partial class DrKennel : Area3D, IPounceable
 		Vfx.BossDefeat(this, GlobalPosition + Vector3.Up * 1.5f);
 		var tween = CreateTween();
 		tween.TweenProperty(this, "scale", Vector3.One * 0.01f, 1.2f);
-		tween.TweenCallback(Callable.From(() => { GameState.CompleteLevel(); QueueFree(); }));
+		tween.TweenCallback(Callable.From(() => { GameState.CompleteLevel(false); QueueFree(); }));
 	}
 
 	private void Tint(Color? color)

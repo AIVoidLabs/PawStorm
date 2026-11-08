@@ -180,7 +180,7 @@ def clank(rng):
 # ---------------------------------------------------------------- music
 SCALES = {
     "major": [0, 2, 4, 5, 7, 9, 11], "minor": [0, 2, 3, 5, 7, 8, 10], "mixo": [0, 2, 4, 5, 7, 9, 10],
-    "lydian": [0, 2, 4, 6, 7, 9, 11], "phrygian": [0, 1, 3, 5, 7, 8, 10],
+    "lydian": [0, 2, 4, 6, 7, 9, 11], "phrygian": [0, 1, 3, 5, 7, 8, 10], "dorian": [0, 2, 3, 5, 7, 9, 10],
 }
 
 
@@ -294,6 +294,9 @@ MUSIC = {
     "forest": dict(bpm=104, root=53, scale="lydian", prog=[0, 3, 4, 1], seed=41, lead_kind="flute", drums=dict(kick=K2, hat=[1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]), arp=("up2", 8, 1, "pluck"), bass_style="long", lead_oct=1, density=0.6),
     "factory": dict(bpm=126, root=50, scale="minor", prog=[0, 0, 5, 6], seed=51, lead_kind="saw", drums=dict(kick=K4, snare=SN, hat=H16, clank=[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]), bass_style="drive16", pad_on=False, density=0.65),
     "sky": dict(bpm=120, root=64, scale="lydian", prog=[0, 4, 1, 3], seed=61, lead_kind="bell", drums=dict(kick=K2, hat=H8, open=OP), arp=("fast", 16, 1, "bell"), bass_style="long", lead_oct=0, density=0.6),
+    "crystal": dict(bpm=108, root=57, scale="dorian", prog=[0, 5, 3, 4], seed=81, lead_kind="bell", drums=dict(kick=K2, hat=H8), arp=("up2", 8, 1, "bell"), bass_style="long", lead_oct=0, density=0.5),
+    "temple": dict(bpm=112, root=50, scale="dorian", prog=[0, 3, 5, 4], seed=91, lead_kind="pluck", drums=dict(kick=KS, snare=SN, hat=H8), arp=("up", 4, 1, "pluck"), bass_style="walk", swing=0.15, density=0.7),
+    "boss2": dict(bpm=164, root=47, scale="phrygian", prog=[0, 0, 1, 6], seed=101, lead_kind="saw", drums=dict(kick=KD, snare=SN, hat=H16, open=OP), arp=("fast", 16, 1, "pluck"), bass_style="drive16", density=0.85, lead_gain=0.62),
     "boss": dict(bpm=152, root=52, scale="phrygian", prog=[0, 1, 0, 6], seed=71, lead_kind="saw", drums=dict(kick=KD, snare=SN, hat=H16, open=OP), arp=("fast", 16, 1, "pluck"), bass_style="drive16", density=0.8, lead_gain=0.6),
 }
 
@@ -364,8 +367,43 @@ def amb_boss(rng):
     return seamless(x, int(1.0 * SR))
 
 
+def amb_crystal(rng):
+    n = int(10 * SR) + int(1.0 * SR)
+    t = np.arange(n) / SR
+    hum = (np.sin(2 * np.pi * 55 * t) * 0.35 + np.sin(2 * np.pi * 82.5 * t) * 0.2) * (0.7 + 0.3 * np.sin(2 * np.pi * 0.2 * t))
+    x = hum + lowpass(noise(n, rng), 300) * 0.5
+    rnd = random.Random(3)
+    for _ in range(7):  # water drips with a soft echo
+        st = rnd.uniform(0.3, 9.0)
+        f = rnd.uniform(1100, 2000)
+        tt_ = tt(0.18)
+        drip = np.sin(2 * np.pi * f * tt_ * (1 + 0.25 * np.exp(-tt_ * 30))) * np.exp(-tt_ / 0.04) * 0.25
+        place(x, st, drip)
+        place(x, st + 0.22, drip * 0.4)
+    return seamless(x, int(1.0 * SR))
+
+
+def amb_temple(rng):
+    out = amb_wind(rng, 0.8, 120, 800, 0.4)
+    for st, m in ((1.5, 86), (3.8, 91), (6.6, 83), (8.4, 88)):
+        place(out, st, bell(mtof(m), 2.0, 0.9), 0.05)
+    return out
+
+
+def amb_storm(rng):
+    n = int(10 * SR) + int(1.0 * SR)
+    t = np.arange(n) / SR
+    rain = highpass(noise(n, rng), 2500) * 0.28
+    rumble = lowpass(noise(n, rng), 90) * 1.4 * (0.6 + 0.4 * np.sin(2 * np.pi * 0.17 * t))
+    x = rain + rumble
+    for st in (2.2, 6.8):  # thunder rolls
+        tt_ = tt(2.2)
+        roll = lowpass(noise(len(tt_), rng), 140) * np.exp(-tt_ / 0.9) * np.minimum(1, tt_ / 0.08) * 1.6
+        place(x, st, roll)
+    return seamless(x, int(1.0 * SR))
+
 AMBIENT = {"amb_rooftops": amb_rooftops, "amb_harbor": amb_waves, "amb_forest": amb_forest, "amb_factory": amb_factory,
-           "amb_sky": amb_sky, "amb_boss": amb_boss}
+           "amb_sky": amb_sky, "amb_boss": amb_boss, "amb_crystal": amb_crystal, "amb_temple": amb_temple, "amb_storm": amb_storm}
 
 
 # ---------------------------------------------------------------- sfx
@@ -432,8 +470,36 @@ def sfx_charge_loop(rng):
     return buzz * (0.65 + 0.35 * np.sin(2 * np.pi * 12 * t))
 
 
+def sfx_laser_fire(rng):
+    t = tt(0.4)
+    sweep = np.sin(2 * np.pi * np.cumsum(1500 * np.exp(-t * 7) + 260) / SR) * np.exp(-t / 0.16)
+    return sweep * 0.8 + highpass(noise(len(t), rng), 3000) * np.exp(-t / 0.03) * 0.5
+
+
+def sfx_laser_hit(rng):
+    t = tt(0.4)
+    return lowpass(noise(len(t), rng), 1800) * np.exp(-t / 0.1) * 0.9 + np.sin(2 * np.pi * np.cumsum(140 * np.exp(-t * 8) + 40) / SR) * np.exp(-t / 0.12)
+
+
+def sfx_reflect(rng):
+    t = tt(0.5)
+    ping = (np.sin(2 * np.pi * 880 * t) + 0.6 * np.sin(2 * np.pi * 1320 * t) + 0.3 * np.sin(2 * np.pi * 1760 * t)) * np.exp(-t / 0.18)
+    return ping * 0.6 + bandpass(noise(len(t), rng), 800, 5000) * np.exp(-t / 0.05) * 0.4
+
+
+def sfx_vent(rng):
+    t = tt(1.0)
+    hiss = highpass(noise(len(t), rng), 1800) * np.minimum(1, t / 0.05) * np.exp(-t / 0.55)
+    return hiss * 0.9 + np.sin(2 * np.pi * np.cumsum(500 * np.exp(-t * 2.5) + 90) / SR) * np.exp(-t / 0.4) * 0.3
+
+
+def sfx_thunder(rng):
+    t = tt(1.8)
+    return lowpass(noise(len(t), rng), 220) * np.exp(-t / 0.7) * np.minimum(1, t / 0.03) * 1.6 + highpass(noise(len(t), rng), 2500) * np.exp(-t / 0.02) * 0.5
+
 SFX = {"land": sfx_land, "step": sfx_step, "wall": sfx_wall, "loop": sfx_loop, "uiclick": sfx_uiclick, "uihover": sfx_uihover,
-       "boss_warn": sfx_boss_warn, "boss_stun": sfx_boss_stun, "grind_loop": sfx_grind_loop, "charge_loop": sfx_charge_loop}
+       "boss_warn": sfx_boss_warn, "boss_stun": sfx_boss_stun, "grind_loop": sfx_grind_loop, "charge_loop": sfx_charge_loop,
+       "laser_fire": sfx_laser_fire, "laser_hit": sfx_laser_hit, "reflect": sfx_reflect, "vent": sfx_vent, "thunder": sfx_thunder}
 
 
 def want(stem):
