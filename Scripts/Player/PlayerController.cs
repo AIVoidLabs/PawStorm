@@ -56,6 +56,7 @@ public partial class PlayerController : CharacterBody3D
 		InputDir = ReadCameraRelativeInput();
 		Machine.Physics(dt);
 		UpdateVisual(dt);
+		UpdatePounceIndicator();
 		if (GlobalPosition.Y < KillHeight) Die();
 	}
 
@@ -192,6 +193,17 @@ public partial class PlayerController : CharacterBody3D
 	/// <summary>Homing attack: lock the nearest pounce target in front and switch to the Pounce state.</summary>
 	public bool TryPounce()
 	{
+		Node3D best = FindPounceTarget();
+		if (best == null) return false;
+		PounceTargetNode = best;
+		ConsumeJump();
+		Machine.Transition(PlayerStateId.Pounce);
+		return true;
+	}
+
+	/// <summary>Nearest pounce target in range and roughly in the travel direction, or null.</summary>
+	public Node3D FindPounceTarget()
+	{
 		Vector3 fwd = InputDir.LengthSquared() > 0.01f ? InputDir.Normalized()
 			: HorizontalSpeed > 1f ? new Vector3(Velocity.X, 0, Velocity.Z).Normalized() : Facing;
 		Node3D best = null;
@@ -206,11 +218,38 @@ public partial class PlayerController : CharacterBody3D
 			if (h.LengthSquared() > 0.01f && h.Normalized().Dot(fwd) < 0.2f) continue;
 			if (d < bestDist) { best = t; bestDist = d; }
 		}
-		if (best == null) return false;
-		PounceTargetNode = best;
-		ConsumeJump();
-		Machine.Transition(PlayerStateId.Pounce);
-		return true;
+		return best;
+	}
+
+	private MeshInstance3D _indicator;
+
+	/// <summary>Yellow ring around the target the Pounce would lock onto (shown while airborne).</summary>
+	private void UpdatePounceIndicator()
+	{
+		if (_indicator == null)
+		{
+			var mat = new StandardMaterial3D
+			{
+				ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+				AlbedoColor = new Color(1f, 0.9f, 0.1f),
+				NoDepthTest = true,
+			};
+			_indicator = new MeshInstance3D
+			{
+				Mesh = new TorusMesh { InnerRadius = 0.75f, OuterRadius = 0.9f, Material = mat },
+				TopLevel = true,
+				Visible = false,
+			};
+			AddChild(_indicator);
+		}
+		bool air = Machine.CurrentId is PlayerStateId.Jump or PlayerStateId.Fall;
+		Node3D t = air ? FindPounceTarget() : (Machine.CurrentId == PlayerStateId.Pounce ? PounceTargetNode : null);
+		if (t == null || !GodotObject.IsInstanceValid(t)) { _indicator.Visible = false; return; }
+		float pulse = 1f + 0.15f * Mathf.Sin(Time.GetTicksMsec() * 0.012f);
+		_indicator.Visible = true;
+		_indicator.GlobalPosition = t.GlobalPosition;
+		_indicator.Scale = Vector3.One * pulse * 1.2f;
+		_indicator.Rotation = new Vector3(Mathf.Pi / 2f, 0, 0); // ring stands up, seen from the side
 	}
 
 	/// <summary>Grab a rail when falling close to it.</summary>
@@ -330,6 +369,9 @@ public partial class PlayerController : CharacterBody3D
 				dir = dir.Normalized();
 				if (speed < Stats.MaxSpeed)
 					speed = Mathf.Min(Stats.MaxSpeed, speed + Stats.Acceleration * dt * InputDir.Length());
+				else if (n.Y > 0.95f)
+					// Over top speed on flat ground (after a Spin Dash, boost...): bleed back to MaxSpeed.
+					speed = Mathf.Max(Stats.MaxSpeed, speed - Stats.OverspeedFriction * dt);
 			}
 			vel = dir * speed;
 		}
@@ -382,8 +424,15 @@ public partial class PlayerController : CharacterBody3D
 	private void UpdateVisual(float dt)
 	{
 		if (Visual == null) return;
-		bool ball = Machine.CurrentId == PlayerStateId.Charge || Machine.CurrentId == PlayerStateId.Spin;
+		var id = Machine.CurrentId;
+		bool ball = id == PlayerStateId.Charge || id == PlayerStateId.Spin || id == PlayerStateId.Pounce;
 		Visual.Scale = Visual.Scale.Lerp(ball ? new Vector3(1, 0.6f, 1) : Vector3.One, Mathf.Clamp(15f * dt, 0f, 1f));
+		// Pounce / Spin: roll forward like a ball; otherwise ease back upright.
+		var rot = Visual.Rotation;
+		rot.X = id == PlayerStateId.Pounce || id == PlayerStateId.Spin
+			? Mathf.Wrap(rot.X - 22f * dt, -Mathf.Pi, Mathf.Pi)
+			: Mathf.LerpAngle(rot.X, 0f, Mathf.Clamp(15f * dt, 0f, 1f));
+		Visual.Rotation = rot;
 		if (Machine.CurrentId == PlayerStateId.Charge) return;
 		Vector3 h = new Vector3(Velocity.X, 0, Velocity.Z);
 		if (h.LengthSquared() > 0.25f)
