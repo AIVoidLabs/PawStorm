@@ -1,24 +1,11 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Material" path="res://Art/Materials/Outline.tres" id="outline"]
-
 [ext_resource type="Script" path="res://Scripts/Core/FishPickup.cs" id="1"]
+[ext_resource type="PackedScene" path="res://Art/Models/Fish.glb" id="2"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="3"]
 
 [sub_resource type="SphereShape3D" id="shape"]
 radius = 0.6
-
-[sub_resource type="StandardMaterial3D" id="mat"]
-diffuse_mode = 3
-specular_mode = 2
-next_pass = ExtResource("outline")
-albedo_color = Color(0.2, 0.7, 1, 1)
-emission_enabled = true
-emission = Color(0.1, 0.4, 0.7, 1)
-
-[sub_resource type="CapsuleMesh" id="mesh"]
-material = SubResource("mat")
-radius = 0.15
-height = 0.6
 
 [node name="Fish" type="Area3D"]
 script = ExtResource("1")
@@ -26,6 +13,6 @@ script = ExtResource("1")
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("shape")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0)
-mesh = SubResource("mesh")
+[node name="Model" parent="." instance=ExtResource("2")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0, 0)
+script = ExtResource("3")

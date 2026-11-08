@@ -15,7 +15,9 @@ public partial class Checkpoint : Area3D
 		_active = true;
 		p.SetCheckpoint(GlobalPosition + Vector3.Up * 0.5f);
 		Sfx.Play(this, "checkpoint");
-		foreach (Node c in GetChildren())
-			if (c is MeshInstance3D m) m.MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.3f, 1f, 0.4f) };
+		// Only the flag turns green (it is its own model node named "Flag").
+		if (GetNodeOrNull("Flag") is Node flag)
+			foreach (MeshInstance3D m in ToonModel.Meshes(flag))
+				m.MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.3f, 1f, 0.4f) };
 	}
 }

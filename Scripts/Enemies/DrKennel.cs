@@ -142,9 +142,8 @@ public partial class DrKennel : Area3D, IPounceable
 
 	private void Tint(Color? color)
 	{
-		foreach (Node c in GetChildren())
+		foreach (MeshInstance3D m in ToonModel.Meshes(this))
 		{
-			if (c is not MeshInstance3D m) continue;
 			m.MaterialOverride = color.HasValue
 				? new StandardMaterial3D { AlbedoColor = color.Value, EmissionEnabled = true, Emission = color.Value * 0.6f }
 				: null;

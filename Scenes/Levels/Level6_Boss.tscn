@@ -15,6 +15,10 @@
 [ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
 [ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
 [ext_resource type="Script" path="res://Scripts/Enemies/DrKennel.cs" id="14"]
+[ext_resource type="PackedScene" path="res://Art/Models/Tree.glb" id="20"]
+[ext_resource type="PackedScene" path="res://Art/Models/Crate.glb" id="21"]
+[ext_resource type="PackedScene" path="res://Art/Models/DrKennel.glb" id="22"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]
 
 [sub_resource type="StandardMaterial3D" id="ground"]
 diffuse_mode = 3
@@ -196,6 +200,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.5886, 1.2, -8.9998)
 
 [node name="Enemies" type="Node3D" parent="."]
 
+[node name="Decor" type="Node3D" parent="."]
+
 [node name="Boss" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -8)
 script = ExtResource("14")
@@ -204,18 +210,5 @@ script = ExtResource("14")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 shape = SubResource("boss_shape")
 
-[node name="Body" type="MeshInstance3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
-mesh = SubResource("boss_body")
-
-[node name="Head" type="MeshInstance3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -0.2)
-mesh = SubResource("boss_head")
-
-[node name="GoggleL" type="MeshInstance3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 2.8, -0.9)
-mesh = SubResource("boss_goggle")
-
-[node name="GoggleR" type="MeshInstance3D" parent="Boss"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 2.8, -0.9)
-mesh = SubResource("boss_goggle")
+[node name="Model" parent="Boss" instance=ExtResource("22")]
+script = ExtResource("23")

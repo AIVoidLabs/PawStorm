@@ -53,6 +53,8 @@ function New-Level($def) {
 	function Enemy([double]$x, [double]$y, [double]$z, [double]$ox, [double]$oy, [double]$oz) { $script:enN++; Add "`n[node name=`"E$($script:enN)`" parent=`"Enemies`" instance=ExtResource(`"10`")]`ntransform = $(T $x $y $z)`nPatrolOffset = $(V $ox $oy $oz)" }
 	$script:tgN = 0
 	function Target([double]$x, [double]$y, [double]$z) { $script:tgN++; Add "`n[node name=`"T$($script:tgN)`" type=`"Node3D`" parent=`"PounceTargets`"]`ntransform = $(T $x $y $z)`nscript = ExtResource(`"8`")`n`n[node name=`"Mesh`" type=`"MeshInstance3D`" parent=`"PounceTargets/T$($script:tgN)`"]`nmesh = SubResource(`"target_mesh`")" }
+	$script:dcN = 0
+	function Decor([string]$kind, [double]$x, [double]$y, [double]$z, [double]$sc = 1, [double]$rotY = 0) { $script:dcN++; $id = if ($kind -eq 'tree') { 20 } else { 21 }; $a = $rotY * [math]::PI / 180; $c = [math]::Cos($a) * $sc; $s = [math]::Sin($a) * $sc; Add "`n[node name=`"D$($script:dcN)`" parent=`"Decor`" instance=ExtResource(`"$id`")]`ntransform = Transform3D($(F $c), 0, $(F (-$s)), 0, $(F $sc), 0, $(F $s), 0, $(F $c), $(F $x), $(F $y), $(F $z))`nscript = ExtResource(`"23`")" }
 	$script:cpN = 0
 	function Check([double]$x, [double]$y, [double]$z) { $script:cpN++; Add "`n[node name=`"CP$($script:cpN)`" parent=`".`" instance=ExtResource(`"11`")]`ntransform = $(T $x $y $z)" }
 
@@ -67,6 +69,8 @@ function New-Level($def) {
 	if ($def.Fish) { & $def.Fish }
 	Add "`n[node name=`"Enemies`" type=`"Node3D`" parent=`".`"]"
 	if ($def.Enemies) { & $def.Enemies }
+	Add "`n[node name=`"Decor`" type=`"Node3D`" parent=`".`"]"
+	if ($def.Decor) { & $def.Decor }
 	if ($def.Extra) { & $def.Extra }
 
 	$c = $def.Colors
@@ -88,6 +92,10 @@ function New-Level($def) {
 [ext_resource type="PackedScene" path="res://Scenes/Props/StormCore.tscn" id="12"]
 [ext_resource type="Script" path="res://Scripts/Core/LevelController.cs" id="13"]
 [ext_resource type="Script" path="res://Scripts/Enemies/DrKennel.cs" id="14"]
+[ext_resource type="PackedScene" path="res://Art/Models/Tree.glb" id="20"]
+[ext_resource type="PackedScene" path="res://Art/Models/Crate.glb" id="21"]
+[ext_resource type="PackedScene" path="res://Art/Models/DrKennel.glb" id="22"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="23"]
 
 [sub_resource type="StandardMaterial3D" id="ground"]
 diffuse_mode = 3
@@ -231,6 +239,7 @@ New-Level @{
 		Plat 'Crate4' -4 3 -130 3 3 'accent' 3
 		Wall 'Container' -9 -100 8 6 8
 	}
+	Decor = { $i = 0; for ($z = -8; $z -gt -235; $z -= 17) { $i++; if (($z -lt -58 -and $z -gt -76) -or ($z -lt -148 -and $z -gt -168)) { continue }; Decor 'crate' 11 0 $z 1 ($i * 37); if ($i % 3 -eq 0) { Decor 'crate' 11 1.2 $z 0.9 ($i * 53) }; Decor 'crate' -11 0 ($z - 6) 1.1 ($i * 71) } }
 	Rails = { Rail 'RailGap' @(@(0, 2.0, -146), @(0, 1.6, -158), @(0, 1.0, -170)) }
 	Targets = { Target 0 5 -80; Target 3 5 -100; Target 0 4 -158 }
 	Extra = {
@@ -258,6 +267,7 @@ New-Level @{
 		Plat 'LogStep1' 0 1 -170 6 3 'accent' 1
 		Plat 'LogStep2' 0 2 -176 6 3 'accent' 1
 	}
+	Decor = { $i = 0; for ($z = 4; $z -gt -245; $z -= 13) { $i++; $sc = 1.3 + (($i * 7) % 5) * 0.15; Decor 'tree' 19 0 $z $sc ($i * 40); Decor 'tree' -19 0 ($z - 6) ($sc + 0.2) ($i * 25) } }
 	Rails = { Rail 'RailRavine' @(@(0, 3.5, -102), @(0, 3.2, -120), @(0, 2.4, -138)) }
 	Targets = { Target 0 4 -105; Target 0 5 -118; Target -2 4 -130 }
 	Extra = {
@@ -281,6 +291,7 @@ New-Level @{
 		Wall 'Shaft' 11 -125 12 6 8
 		Slope 'Ramp1' 0 0 -50 12 8 12
 	}
+	Decor = { $i = 0; for ($z = -5; $z -gt -250; $z -= 20) { $i++; if (($z -lt -55 -and $z -gt -85) -or ($z -lt -145 -and $z -gt -178)) { continue }; Decor 'crate' 13.5 0 $z 1.2 ($i * 37); Decor 'crate' -13.5 0 ($z - 8) 1.1 ($i * 61) } }
 	Rails = { Rail 'RailPit1' @(@(0, 2.2, -56), @(0, 2.0, -70), @(0, 1.2, -86)); Rail 'RailPit2' @(@(0, 2.2, -146), @(0, 2.0, -160), @(0, 1.2, -176)) }
 	Targets = { Target 0 5 -72; Target 0 5 -158 }
 	Extra = {
@@ -337,21 +348,8 @@ script = ExtResource("14")
 transform = $(T 0 1.2 0)
 shape = SubResource("boss_shape")
 
-[node name="Body" type="MeshInstance3D" parent="Boss"]
-transform = $(T 0 1.2 0)
-mesh = SubResource("boss_body")
-
-[node name="Head" type="MeshInstance3D" parent="Boss"]
-transform = $(T 0 2.6 -0.2)
-mesh = SubResource("boss_head")
-
-[node name="GoggleL" type="MeshInstance3D" parent="Boss"]
-transform = $(T -0.35 2.8 -0.9)
-mesh = SubResource("boss_goggle")
-
-[node name="GoggleR" type="MeshInstance3D" parent="Boss"]
-transform = $(T 0.35 2.8 -0.9)
-mesh = SubResource("boss_goggle")
+[node name="Model" parent="Boss" instance=ExtResource("22")]
+script = ExtResource("23")
 "@
 	}
 	BossResources = $true

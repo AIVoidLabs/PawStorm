@@ -65,3 +65,6 @@ Spin Dash (Pati Sprint: Shift/X basılı tut, bırak), Pounce (havada Space, kı
 - **Bölgeler (gri kutu):** 1 Çatılar, 2 Liman, 3 Orman, 4 Fabrika, 5 Gökyüzü Adası, 6 Dr. Kennel boss. Sahne sırası `Scripts/Core/Levels.cs`. Bölüm 2-6 `Docs/tools/gen_levels.ps1` ile üretilir (elle düzenlenirse betik tekrar çalıştırılınca ezilir).
 - **Cilalama:** toon gölgelendirme, ters-gövde outline (`Art/Materials/Outline.*`), placeholder sesler (`Docs/tools/make_sfx.ps1`), ana menü, duraklatma (Esc/Start).
 - **Eksik:** gerçek modeller/animasyon, müzik, ekran-uzayı outline (küpsel zeminde outline yok), ayarlar menüsü, kaydetme, bölüm seçimi, gerçek boss çeşitliliği.
+
+## Modeller
+Pati, Pup (d��man), Dr. Kennel, Bal�k, Storm Core, Checkpoint, Sand�k ve A�a� Blender ile betikle �retilir: `Docs/tools/blender/make_models.py` -> `Art/Models/*.glb`. Oyunda `ToonModel` beti�i toon + outline uygular. Animasyon yok (statik poz), kemik kurulumu sonraki i�.

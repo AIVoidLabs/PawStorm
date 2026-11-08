@@ -1,17 +1,12 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Core/Checkpoint.cs" id="1"]
+[ext_resource type="PackedScene" path="res://Art/Models/CheckpointPole.glb" id="2"]
+[ext_resource type="PackedScene" path="res://Art/Models/CheckpointFlag.glb" id="3"]
+[ext_resource type="Script" path="res://Scripts/Core/ToonModel.cs" id="4"]
 
 [sub_resource type="BoxShape3D" id="shape"]
 size = Vector3(4, 3, 1.5)
-
-[sub_resource type="CylinderMesh" id="pole"]
-top_radius = 0.08
-bottom_radius = 0.08
-height = 2.5
-
-[sub_resource type="BoxMesh" id="flag"]
-size = Vector3(0.9, 0.5, 0.05)
 
 [node name="Checkpoint" type="Area3D"]
 script = ExtResource("1")
@@ -20,11 +15,10 @@ script = ExtResource("1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("shape")
 
-[node name="Pole" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 1.25, 0)
-mesh = SubResource("pole")
+[node name="Pole" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, 0)
+script = ExtResource("4")
 
-[node name="Flag" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 2.1, 0)
-mesh = SubResource("flag")
-material_override = null
+[node name="Flag" parent="." instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, 0)
+script = ExtResource("4")
